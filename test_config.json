@@ -1,0 +1,41 @@
+{
+    "_comment": "Test configuration - Cấu hình để chạy test",
+    "environments": {
+        "localhost": {
+            "chatbot_url": "http://127.0.0.1:3333",
+            "ai_client_url": "http://127.0.0.1:3334"
+        },
+        "staging": {
+            "chatbot_url": "https://staging-chatbot.example.com",
+            "ai_client_url": "https://staging-ai.example.com"
+        },
+        "production": {
+            "chatbot_url": "https://chatbot.example.com",
+            "ai_client_url": "https://ai.example.com"
+        }
+    },
+    "test_identity": {
+        "_comment": "Chọn 1 trong 3 mode: guest_new, guest_existing, user",
+        "mode": "user",
+        "guest_new": {
+            "_comment": "Tạo guest mới cho mỗi test (default)",
+            "fingerprint": null
+        },
+        "guest_existing": {
+            "_comment": "Dùng guest có sẵn - điền fingerprint hoặc guest_id",
+            "fingerprint": "YOUR_FINGERPRINT_HERE",
+            "guest_id": "YOUR_GUEST_UUID_HERE"
+        },
+        "user": {
+            "_comment": "Test như user đã login - cần JWT token",
+            "jwt_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDU1NTRiZC1iZTFlLTQ5MmMtOWU1YS02MmY1NzE5Y2RhOWEiLCJpc3MiOiJ2aWV0ZHVjIiwidXNlcklkIjoiMDA1NTU0YmQtYmUxZS00OTJjLTllNWEtNjJmNTcxOWNkYTlhIiwibmFtZSI6ImhpZW4gdGhpIiwicm9sZXMiOlsidXNlciJdLCJ0ZW5hbnRJZCI6InB1YmxpYyIsInVzZXJOYW1lIjoiY2h1ZWlmczMyNTYyOUBnbWFpbC5jb20iLCJpYXQiOjE3NjY1Nzg5NTIsImV4cCI6MTc2NjY2NTM1Mn0.vjAkJ7LcmsnasPTa4R26uJaFpRF3pBczT9VQXMDSSaM",
+            "user_id": "005554bd-be1e-492c-9e5a-62f5719cda9a"
+        }
+    },
+    "how_to_get_credentials": {
+        "fingerprint": "Mở browser DevTools > Application > Cookies > tìm GUEST_ID hoặc fingerprint",
+        "guest_id": "Lấy từ response của /api/init-session hoặc từ database table 'guests'",
+        "jwt_token": "Login vào app > DevTools > Application > Cookies > tìm 'accessToken' hoặc 'jwt'",
+        "user_id": "Lấy từ JWT payload hoặc từ database table 'users'"
+    }
+}
