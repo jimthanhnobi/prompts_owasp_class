@@ -1,0 +1,272 @@
+{
+  "metadata": {
+    "project": "MoneyCare Chatbot AI - Member Detection Tests",
+    "version": "1.0.0",
+    "created_date": "2025-12-26",
+    "description": "Test cases cho member detection - detect Tùng, Trang, Hiền trong message",
+    "category": "Transaction Member Detection",
+    "priority": "High",
+    "total_tests": 12,
+    "test_members": [
+      {"memberId": "bd79ba51-8b2b-40aa-8e29-23079f3349bb", "displayName": "Tùng", "relation": "con trai"},
+      {"memberId": "96f17d8a-f898-4826-b997-1ae8de85ebfe", "displayName": "Trang", "relation": "con gái"},
+      {"memberId": "6d41a461-9757-4cd3-b446-57a7bdd0ed3b", "displayName": "Hiền", "relation": "em"}
+    ]
+  },
+  "test_cases": [
+    {
+      "Test_Case_ID": "MEMBER_001",
+      "Feature_Area": "Member_Detection",
+      "Description_VN": "Detect member 'Tùng' với từ 'cho'",
+      "User_Message_Input": "Chi 50k cho Tùng",
+      "Precondition": "User có member Tùng",
+      "Expected_Bot_Response": "JSON chứa transaction với member",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 50000,
+        "currency": "VND",
+        "member_id": "bd79ba51-8b2b-40aa-8e29-23079f3349bb",
+        "display_name": "Tùng"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Member_Detection",
+      "Notes": "Detect 'Tùng' in message → fill member_id + display_name"
+    },
+    {
+      "Test_Case_ID": "MEMBER_002",
+      "Feature_Area": "Member_Detection",
+      "Description_VN": "Detect member 'Trang' với từ 'mua quà'",
+      "User_Message_Input": "Mua quà sinh nhật Trang 200k",
+      "Precondition": "User có member Trang",
+      "Expected_Bot_Response": "JSON chứa transaction với member",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 200000,
+        "currency": "VND",
+        "category_name": "Quà tặng",
+        "member_id": "96f17d8a-f898-4826-b997-1ae8de85ebfe",
+        "display_name": "Trang"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Member_Detection"
+    },
+    {
+      "Test_Case_ID": "MEMBER_003",
+      "Feature_Area": "Member_Detection",
+      "Description_VN": "Detect member 'Hiền' với từ 'gửi'",
+      "User_Message_Input": "Gửi 100k cho Hiền mua sách",
+      "Precondition": "User có member Hiền",
+      "Expected_Bot_Response": "JSON chứa transaction với member",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 100000,
+        "currency": "VND",
+        "member_id": "6d41a461-9757-4cd3-b446-57a7bdd0ed3b",
+        "display_name": "Hiền"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Member_Detection"
+    },
+    {
+      "Test_Case_ID": "MEMBER_004",
+      "Feature_Area": "Member_Detection",
+      "Description_VN": "No member detected → member_id null",
+      "User_Message_Input": "Chi 100k ăn trưa",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction không có member",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 100000,
+        "currency": "VND",
+        "category_name": "Ăn uống",
+        "member_id": null,
+        "display_name": null
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Member_Detection",
+      "Notes": "No member name → member_id = null"
+    },
+    {
+      "Test_Case_ID": "MEMBER_005",
+      "Feature_Area": "Member_Detection",
+      "Description_VN": "Case-insensitive detection 'tùng'",
+      "User_Message_Input": "Chi 50k cho tùng",
+      "Precondition": "User có member Tùng",
+      "Expected_Bot_Response": "JSON chứa transaction với member",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 50000,
+        "currency": "VND",
+        "member_id": "bd79ba51-8b2b-40aa-8e29-23079f3349bb",
+        "display_name": "Tùng"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Member_Detection",
+      "Notes": "'tùng' (lowercase) should match 'Tùng'"
+    },
+    {
+      "Test_Case_ID": "MEMBER_006",
+      "Feature_Area": "Member_Detection",
+      "Description_VN": "Detect member trong câu dài",
+      "User_Message_Input": "Hôm nay đưa 500k cho Tùng đi học thêm toán",
+      "Precondition": "User có member Tùng",
+      "Expected_Bot_Response": "JSON chứa transaction với member",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 500000,
+        "currency": "VND",
+        "category_name": "Học tập",
+        "member_id": "bd79ba51-8b2b-40aa-8e29-23079f3349bb",
+        "display_name": "Tùng"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Medium",
+      "Category": "Member_Detection"
+    },
+    {
+      "Test_Case_ID": "MEMBER_007",
+      "Feature_Area": "Member_Detection",
+      "Description_VN": "Detect member với từ 'tiền túi'",
+      "User_Message_Input": "Cho Trang 100k tiền túi",
+      "Precondition": "User có member Trang",
+      "Expected_Bot_Response": "JSON chứa transaction với member",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 100000,
+        "currency": "VND",
+        "member_id": "96f17d8a-f898-4826-b997-1ae8de85ebfe",
+        "display_name": "Trang"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Medium",
+      "Category": "Member_Detection"
+    },
+    {
+      "Test_Case_ID": "MEMBER_008",
+      "Feature_Area": "Member_Detection",
+      "Description_VN": "Multiple transactions, one has member",
+      "User_Message_Input": "Chi 50k cà phê, 200k cho Tùng mua giày",
+      "Precondition": "User có member Tùng",
+      "Expected_Bot_Response": "JSON chứa 2 transactions",
+      "Expected_Parsed_Transaction": {
+        "transactions_count": 2,
+        "first_transaction": {
+          "amount": 50000,
+          "member_id": null
+        },
+        "second_transaction": {
+          "amount": 200000,
+          "member_id": "bd79ba51-8b2b-40aa-8e29-23079f3349bb",
+          "display_name": "Tùng"
+        }
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Member_Detection",
+      "Notes": "Only second transaction has member"
+    },
+    {
+      "Test_Case_ID": "MEMBER_009",
+      "Feature_Area": "Member_Detection",
+      "Description_VN": "Income transaction with member",
+      "User_Message_Input": "Nhận 1tr từ Hiền trả nợ",
+      "Precondition": "User có member Hiền",
+      "Expected_Bot_Response": "JSON chứa transaction với member",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "income",
+        "amount": 1000000,
+        "currency": "VND",
+        "member_id": "6d41a461-9757-4cd3-b446-57a7bdd0ed3b",
+        "display_name": "Hiền"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Medium",
+      "Category": "Member_Detection",
+      "Notes": "Member detection works for income too"
+    },
+    {
+      "Test_Case_ID": "MEMBER_010",
+      "Feature_Area": "Member_Detection",
+      "Description_VN": "Detect member với dấu không chính xác",
+      "User_Message_Input": "Chi 50k cho Tung",
+      "Precondition": "User có member Tùng",
+      "Expected_Bot_Response": "JSON chứa transaction (có thể không có member)",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 50000,
+        "currency": "VND",
+        "member_id": null
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Low",
+      "Category": "Member_Detection",
+      "Notes": "'Tung' (no dấu) might not match 'Tùng' - depends on implementation"
+    },
+    {
+      "Test_Case_ID": "MEMBER_011",
+      "Feature_Area": "Member_Detection",
+      "Description_VN": "Member name at the beginning",
+      "User_Message_Input": "Tùng mua sách 150k",
+      "Precondition": "User có member Tùng",
+      "Expected_Bot_Response": "JSON chứa transaction với member",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 150000,
+        "currency": "VND",
+        "category_name": "Học tập",
+        "member_id": "bd79ba51-8b2b-40aa-8e29-23079f3349bb",
+        "display_name": "Tùng"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Medium",
+      "Category": "Member_Detection",
+      "Notes": "Member name at start of sentence"
+    },
+    {
+      "Test_Case_ID": "MEMBER_012",
+      "Feature_Area": "Member_Detection",
+      "Description_VN": "All three members in one message",
+      "User_Message_Input": "Chi 50k cho Tùng, 100k cho Trang, 30k cho Hiền",
+      "Precondition": "User có 3 members",
+      "Expected_Bot_Response": "JSON chứa 3 transactions",
+      "Expected_Parsed_Transaction": {
+        "transactions_count": 3,
+        "members": ["Tùng", "Trang", "Hiền"]
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Member_Detection",
+      "Notes": "3 transactions, each with different member"
+    }
+  ]
+}
+

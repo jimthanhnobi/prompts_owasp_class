@@ -200,8 +200,8 @@
             "Feature_Area": "Intent_Detection",
             "Description_VN": "Detect intent financial_question",
             "User_Message_Input": "Tháng này tôi chi tiêu bao nhiêu?",
-            "Precondition": "User có transaction history",
-            "Expected_Bot_Response": "Thống kê chi tiêu tháng",
+            "Precondition": "User session with transaction history OR guest",
+            "Expected_Bot_Response": "Thống kê (if user with data) OR generic advice/rejection (if guest/no data)",
             "Expected_Parsed_Transaction": null,
             "Target_Dimensions_CLASSS": [
                 "A",
@@ -209,7 +209,8 @@
             ],
             "Target_OWASP_Risks": [],
             "Target_CLASS_Principles": [],
-            "Priority": "Medium"
+            "Priority": "Medium",
+            "Notes": "Accept both detailed stats and 'no data' message. Guest will get generic advice."
         },
         {
             "Test_Case_ID": "TC_011",

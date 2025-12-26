@@ -4,8 +4,14 @@ Usage: python generate_report_only.py [json_file_path]
 """
 import json
 import sys
+import codecs
 from datetime import datetime
 from pathlib import Path
+
+# Fix encoding for Windows console
+if sys.platform == 'win32':
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
 
 from config import TestConfig
 from models import TestRunResult, TestSummary, PassFailStatus, SecurityObservation, StabilityObservation

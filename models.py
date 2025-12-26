@@ -166,7 +166,7 @@ class TestRunResult:
             "Tester": self.tester,
             "Environment": self.environment,
             "LLM_Model": self.llm_model,
-            "Actual_Bot_Response": self.actual_bot_response[:500] if self.actual_bot_response else "",
+            "Actual_Bot_Response": self.actual_bot_response if self.actual_bot_response else "",  # Full response - no truncation for accurate parsing
             "Actual_Parsed_Transaction": json.dumps(self.actual_parsed_transaction) if self.actual_parsed_transaction else "",
             "Pass_Fail": self.pass_fail.value,
             "Issues_Found": "Yes" if self.issues_found else "No",

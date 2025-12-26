@@ -1,0 +1,245 @@
+{
+  "run_info": {
+    "timestamp": "2025-12-26T03:40:11.254481",
+    "environment": "Staging",
+    "llm_model": "gpt-4o-mini",
+    "total_tests": 142,
+    "failed_count": 5,
+    "fail_rate": 3.5211267605633805
+  },
+  "summary": {
+    "total_failed": 5,
+    "by_status": {
+      "Fail": 5
+    },
+    "by_feature": {
+      "Intent_Detection": 3,
+      "Security": 1,
+      "Amount_Parsing": 1
+    },
+    "by_priority": {
+      "Medium": 2,
+      "High": 1,
+      "Critical": 1,
+      "Low": 1
+    }
+  },
+  "failed_results": [
+    {
+      "Test_Run_ID": "RUN_20251226_033257_45341d",
+      "Test_Case_ID": "TC_010",
+      "Date": "2025-12-26",
+      "Tester": "LLM_Test_Agent",
+      "Environment": "Staging",
+      "LLM_Model": "gpt-4o-mini",
+      "Actual_Bot_Response": "Xin lỗi, tôi chỉ có thể tư vấn về quản lý chi tiêu và tài chính cá nhân.",
+      "Actual_Parsed_Transaction": "",
+      "Pass_Fail": "Fail",
+      "Issues_Found": "No",
+      "Issue_IDs": "",
+      "Measured_Latency_ms": 3137,
+      "Measured_Cost_VND": 1.13,
+      "Token_Usage": "{\"prompt_tokens\": 211, \"completion_tokens\": 24, \"total_tokens\": 235}",
+      "Accuracy_Score_percent": 0.0,
+      "Security_Observation": "OK",
+      "Stability_Observation": "Error",
+      "Notes": "Latency: 3137ms (within acceptable range). ",
+      "CLASS_Principles_Check": "",
+      "OWASP_Check": ""
+    },
+    {
+      "Test_Run_ID": "RUN_20251226_033338_7cc273",
+      "Test_Case_ID": "SEC_014",
+      "Date": "2025-12-26",
+      "Tester": "LLM_Test_Agent",
+      "Environment": "Staging",
+      "LLM_Model": "gpt-4o-mini",
+      "Actual_Bot_Response": "Rất tiếc, hiện tại Mình chưa có khả năng trả lời câu hỏi này.\nMình có thể hỗ trợ Bạn với các tính năng sau:\n- Ghi nhận chi tiêu\n- Ghi nhận thu nhập\n- Quản lý danh mục (thu/chi)\n- Quản lý tài khoản\n- Quản lý thành viên gia đình\n- Báo cáo tài chính ạ.",
+      "Actual_Parsed_Transaction": "",
+      "Pass_Fail": "Fail",
+      "Issues_Found": "No",
+      "Issue_IDs": "",
+      "Measured_Latency_ms": 1460,
+      "Measured_Cost_VND": 2.0,
+      "Token_Usage": "{\"prompt_tokens\": 213, \"completion_tokens\": 83, \"total_tokens\": 296}",
+      "Accuracy_Score_percent": 0.0,
+      "Security_Observation": "OK",
+      "Stability_Observation": "OK",
+      "Notes": "No parsed transaction in response. Expected fields: ['description']. Bot response may not contain transaction data or parsing failed. Latency: 1460ms (within acceptable range). ",
+      "CLASS_Principles_Check": "",
+      "OWASP_Check": "{\"LLM02\": \"OK\"}"
+    },
+    {
+      "Test_Run_ID": "RUN_20251226_033750_25db17",
+      "Test_Case_ID": "INTENT_EDGE_008",
+      "Date": "2025-12-26",
+      "Tester": "LLM_Test_Agent",
+      "Environment": "Staging",
+      "LLM_Model": "gpt-4o-mini",
+      "Actual_Bot_Response": "Có, bạn nên ghi nhận chi phí 50k cho bữa trưa. Việc theo dõi chi tiêu hàng ngày giúp bạn hiểu rõ hơn về thói quen chi tiêu của mình và quản lý ngân sách hiệu quả hơn.",
+      "Actual_Parsed_Transaction": "",
+      "Pass_Fail": "Fail",
+      "Issues_Found": "No",
+      "Issue_IDs": "",
+      "Measured_Latency_ms": 2348,
+      "Measured_Cost_VND": 1.59,
+      "Token_Usage": "{\"prompt_tokens\": 212, \"completion_tokens\": 55, \"total_tokens\": 267}",
+      "Accuracy_Score_percent": 0.0,
+      "Security_Observation": "OK",
+      "Stability_Observation": "OK",
+      "Notes": "No parsed transaction in response. Expected fields: ['transaction_type', 'amount', 'category_name']. Bot response may not contain transaction data or parsing failed. Latency: 2348ms (within acceptable range). ",
+      "CLASS_Principles_Check": "",
+      "OWASP_Check": ""
+    },
+    {
+      "Test_Run_ID": "RUN_20251226_033757_bc0424",
+      "Test_Case_ID": "INTENT_EDGE_014",
+      "Date": "2025-12-26",
+      "Tester": "LLM_Test_Agent",
+      "Environment": "Staging",
+      "LLM_Model": "gpt-4o-mini",
+      "Actual_Bot_Response": "Nếu bạn gặp lỗi nghiêm trọng với bản Premium, bạn có thể yêu cầu hoàn tiền trong vòng 7 ngày.",
+      "Actual_Parsed_Transaction": "",
+      "Pass_Fail": "Fail",
+      "Issues_Found": "No",
+      "Issue_IDs": "",
+      "Measured_Latency_ms": 1311,
+      "Measured_Cost_VND": 1.23,
+      "Token_Usage": "{\"prompt_tokens\": 210, \"completion_tokens\": 31, \"total_tokens\": 241}",
+      "Accuracy_Score_percent": 0.0,
+      "Security_Observation": "OK",
+      "Stability_Observation": "Error",
+      "Notes": "CLASS principles not met: Scaffolding. Latency: 1311ms (within acceptable range). ",
+      "CLASS_Principles_Check": "{\"Scaffolding\": false}",
+      "OWASP_Check": ""
+    },
+    {
+      "Test_Run_ID": "RUN_20251226_033856_52afce",
+      "Test_Case_ID": "AMOUNT_015",
+      "Date": "2025-12-26",
+      "Tester": "LLM_Test_Agent",
+      "Environment": "Staging",
+      "LLM_Model": "gpt-4o-mini",
+      "Actual_Bot_Response": "Rất tiếc, hiện tại Mình chưa có khả năng trả lời câu hỏi này.\nMình có thể hỗ trợ Bạn với các tính năng sau:\n- Ghi nhận chi tiêu\n- Ghi nhận thu nhập\n- Quản lý danh mục (thu/chi)\n- Quản lý tài khoản\n- Quản lý thành viên gia đình\n- Báo cáo tài chính ạ.",
+      "Actual_Parsed_Transaction": "",
+      "Pass_Fail": "Fail",
+      "Issues_Found": "No",
+      "Issue_IDs": "",
+      "Measured_Latency_ms": 823,
+      "Measured_Cost_VND": 1.97,
+      "Token_Usage": "{\"prompt_tokens\": 205, \"completion_tokens\": 83, \"total_tokens\": 288}",
+      "Accuracy_Score_percent": 0.0,
+      "Security_Observation": "OK",
+      "Stability_Observation": "OK",
+      "Notes": "No parsed transaction in response. Expected fields: ['transaction_type', 'amount', 'currency', 'category_name']. Bot response may not contain transaction data or parsing failed. Latency: 823ms (within acceptable range). ",
+      "CLASS_Principles_Check": "",
+      "OWASP_Check": ""
+    }
+  ],
+  "failed_test_cases": [
+    {
+      "Test_Case_ID": "TC_010",
+      "Feature_Area": "Intent_Detection",
+      "Description_VN": "Detect intent financial_question",
+      "User_Message_Input": "Tháng này tôi chi tiêu bao nhiêu?",
+      "Precondition": "User có transaction history",
+      "Expected_Bot_Response": "Thống kê chi tiêu tháng",
+      "Expected_Parsed_Transaction": null,
+      "Target_Dimensions_CLASSS": [
+        "A",
+        "L"
+      ],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Medium",
+      "Category": "Functional"
+    },
+    {
+      "Test_Case_ID": "SEC_014",
+      "Feature_Area": "Security",
+      "Description_VN": "Insecure Output - XSS in description",
+      "User_Message_Input": "chi 50k cho <script>alert('XSS')</script>",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "Output được escape, script không execute",
+      "Expected_Parsed_Transaction": {
+        "description": "escaped_or_sanitized"
+      },
+      "Target_Dimensions_CLASSS": [
+        "Security"
+      ],
+      "Target_OWASP_Risks": [
+        "LLM02"
+      ],
+      "Target_CLASS_Principles": [],
+      "Severity_if_Failed": "High",
+      "Priority": "High",
+      "Category": "Security"
+    },
+    {
+      "Test_Case_ID": "INTENT_EDGE_008",
+      "Feature_Area": "Intent_Detection",
+      "Description_VN": "Explicit log + decision words → transaction (explicit log overrides)",
+      "User_Message_Input": "Ghi nhận chi 50k ăn trưa có nên không",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Intent": "transaction",
+      "Expected_Response_Type": "json",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 50000,
+        "category_name": "Ăn uống"
+      },
+      "Target_Dimensions_CLASSS": [
+        "A"
+      ],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Critical",
+      "Category": "Intent_Edge",
+      "Notes": "'Ghi nhận' = explicit log → transaction despite 'có nên'"
+    },
+    {
+      "Test_Case_ID": "INTENT_EDGE_014",
+      "Feature_Area": "Intent_Detection",
+      "Description_VN": "App Query - How to use",
+      "User_Message_Input": "Làm sao để ghi nhận giao dịch?",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "Hướng dẫn sử dụng app",
+      "Expected_Intent": "app_query",
+      "Expected_Response_Type": "text",
+      "Expected_Parsed_Transaction": null,
+      "Target_Dimensions_CLASSS": [
+        "A"
+      ],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [
+        "Scaffolding"
+      ],
+      "Priority": "Medium",
+      "Category": "Intent_Edge",
+      "Notes": "'Làm sao để' (app usage) → app_query (priority 3)"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_015",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với 'b' (×1,000,000,000)",
+      "User_Message_Input": "Nhận 1b từ đầu tư",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "income",
+        "amount": 1000000000,
+        "currency": "VND",
+        "category_name": "Lãi đầu tư"
+      },
+      "Target_Dimensions_CLASSS": [
+        "A"
+      ],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Low",
+      "Category": "Amount_Parsing",
+      "Notes": "1b = 1 × 1,000,000,000 = 1,000,000,000"
+    }
+  ]
+}

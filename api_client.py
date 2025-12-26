@@ -500,6 +500,31 @@ class MoneyCareAPIClient:
         self.conversation_id = None
         self.fingerprint = old_fingerprint
     
+    def estimate_token_usage(self, question: str, answer: str) -> Dict[str, int]:
+        """
+        Estimate token usage from text length
+        
+        Rule of thumb:
+        - English: ~4 characters per token
+        - Vietnamese: ~2-3 characters per token (diacritics)
+        - Mixed: ~3 characters per token (average)
+        
+        Returns: {"prompt_tokens": int, "completion_tokens": int, "total_tokens": int}
+        """
+        # Estimate prompt tokens (question + system prompt overhead ~200 tokens)
+        question_tokens = len(question) // 3
+        system_overhead = 200  # Typical system prompt + formatting
+        prompt_tokens = question_tokens + system_overhead
+        
+        # Estimate completion tokens
+        completion_tokens = len(answer) // 3
+        
+        return {
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": prompt_tokens + completion_tokens
+        }
+    
     def parse_bot_response(self, response_data: Dict[str, Any]) -> Tuple[str, Optional[Dict[str, Any]]]:
         """
         Parse bot response to extract answer and transaction data

@@ -1,0 +1,413 @@
+{
+  "metadata": {
+    "project": "MoneyCare Chatbot AI - Amount Parsing Tests",
+    "version": "1.0.0",
+    "created_date": "2025-12-26",
+    "description": "Test cases cho amount parsing với các format phức tạp (k, tr, m, b, decimal, special formats)",
+    "category": "Transaction Amount Parsing",
+    "priority": "Critical",
+    "total_tests": 20
+  },
+  "test_cases": [
+    {
+      "Test_Case_ID": "AMOUNT_001",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với đơn vị 'k' (×1,000)",
+      "User_Message_Input": "Chi 50k ăn trưa",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 50000,
+        "currency": "VND",
+        "category_name": "Ăn uống",
+        "description": "ăn trưa"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Critical",
+      "Category": "Amount_Parsing",
+      "Notes": "50k = 50 × 1,000 = 50,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_002",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với đơn vị 'K' (uppercase)",
+      "User_Message_Input": "Chi 100 K cà phê",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 100000,
+        "currency": "VND",
+        "category_name": "Ăn uống"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Amount_Parsing",
+      "Notes": "100 K = 100,000 (space + uppercase)"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_003",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với 'nghìn' (×1,000)",
+      "User_Message_Input": "Chi 100 nghìn đổ xăng",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 100000,
+        "currency": "VND",
+        "category_name": "Di chuyển"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Amount_Parsing",
+      "Notes": "100 nghìn = 100 × 1,000 = 100,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_004",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với 'ngàn' (×1,000)",
+      "User_Message_Input": "Chi 50 ngàn ăn sáng",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 50000,
+        "currency": "VND",
+        "category_name": "Ăn uống"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Medium",
+      "Category": "Amount_Parsing",
+      "Notes": "50 ngàn = 50 × 1,000 = 50,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_005",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với 'tr' (×1,000,000)",
+      "User_Message_Input": "Chi 3tr mua quần áo",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 3000000,
+        "currency": "VND",
+        "category_name": "Mua sắm"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Critical",
+      "Category": "Amount_Parsing",
+      "Notes": "3tr = 3 × 1,000,000 = 3,000,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_006",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với 'm' (×1,000,000)",
+      "User_Message_Input": "Chi 5m mua điện thoại",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 5000000,
+        "currency": "VND",
+        "category_name": "Mua sắm"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Amount_Parsing",
+      "Notes": "5m = 5 × 1,000,000 = 5,000,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_007",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với 'triệu' (×1,000,000)",
+      "User_Message_Input": "Chi 2 triệu mua giày",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 2000000,
+        "currency": "VND",
+        "category_name": "Mua sắm"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Amount_Parsing",
+      "Notes": "2 triệu = 2 × 1,000,000 = 2,000,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_008",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với 'củ' (×1,000,000)",
+      "User_Message_Input": "Chi 10 củ đi chơi",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 10000000,
+        "currency": "VND",
+        "category_name": "Giải trí"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Medium",
+      "Category": "Amount_Parsing",
+      "Notes": "10 củ = 10 × 1,000,000 = 10,000,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_009",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với decimal 'tr' (2.5tr)",
+      "User_Message_Input": "Chi 2.5tr mua túi",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 2500000,
+        "currency": "VND",
+        "category_name": "Mua sắm"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Critical",
+      "Category": "Amount_Parsing",
+      "Notes": "2.5tr = 2.5 × 1,000,000 = 2,500,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_010",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với format Xtr99 (14tr99)",
+      "User_Message_Input": "Chi 14tr99 mua giày Nike",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 14990000,
+        "currency": "VND",
+        "category_name": "Mua sắm"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Critical",
+      "Category": "Amount_Parsing",
+      "Notes": "14tr99 = 14×1,000,000 + 99×10,000 = 14,990,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_011",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với format Xm9 (19m9)",
+      "User_Message_Input": "Chi 19m9 mua laptop",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 19900000,
+        "currency": "VND",
+        "category_name": "Mua sắm"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Critical",
+      "Category": "Amount_Parsing",
+      "Notes": "19m9 = 19×1,000,000 + 9×100,000 = 19,900,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_012",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với 'nửa triệu' (500,000)",
+      "User_Message_Input": "Chi nửa triệu mua quà",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 500000,
+        "currency": "VND",
+        "category_name": "Quà tặng"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Amount_Parsing",
+      "Notes": "nửa triệu = 500,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_013",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với 'tỏi' (×1,000,000,000)",
+      "User_Message_Input": "Nhận 5 tỏi từ dự án",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "income",
+        "amount": 5000000000,
+        "currency": "VND",
+        "category_name": "Thu nhập khác"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Medium",
+      "Category": "Amount_Parsing",
+      "Notes": "5 tỏi = 5 × 1,000,000,000 = 5,000,000,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_014",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với 'tỷ' (×1,000,000,000)",
+      "User_Message_Input": "Nhận 2 tỷ từ hợp đồng",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "income",
+        "amount": 2000000000,
+        "currency": "VND",
+        "category_name": "Thu nhập khác"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Medium",
+      "Category": "Amount_Parsing",
+      "Notes": "2 tỷ = 2 × 1,000,000,000 = 2,000,000,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_015",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với 'b' (×1,000,000,000)",
+      "User_Message_Input": "Nhận 1b từ đầu tư",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "income",
+        "amount": 1000000000,
+        "currency": "VND",
+        "category_name": "Lãi đầu tư"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Low",
+      "Category": "Amount_Parsing",
+      "Notes": "1b = 1 × 1,000,000,000 = 1,000,000,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_016",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse amount với 'nửa tỷ' (500,000,000)",
+      "User_Message_Input": "Chi nửa tỷ mua nhà",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 500000000,
+        "currency": "VND",
+        "category_name": "Nhà ở"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "Medium",
+      "Category": "Amount_Parsing",
+      "Notes": "nửa tỷ = 500,000,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_017",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse plain number (no unit, ≥ 4 digits)",
+      "User_Message_Input": "Chi 150000 mua sách",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 150000,
+        "currency": "VND",
+        "category_name": "Học tập"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Amount_Parsing",
+      "Notes": "150000 = 150,000 (plain number ≥ 4 digits)"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_018",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse multiple amounts in one message",
+      "User_Message_Input": "Chi 50k cà phê, 100k ăn trưa, 30k xăng",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa 3 transactions",
+      "Expected_Parsed_Transaction": {
+        "transactions_count": 3,
+        "amounts": [50000, 100000, 30000]
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Amount_Parsing",
+      "Notes": "Multiple amounts: 50k, 100k, 30k"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_019",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse complex format 3tr5 (3tr + 5 trăm nghìn)",
+      "User_Message_Input": "Chi 3tr5 mua áo khoác",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 3500000,
+        "currency": "VND",
+        "category_name": "Mua sắm"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Amount_Parsing",
+      "Notes": "3tr5 = 3×1M + 5×100k = 3,500,000"
+    },
+    {
+      "Test_Case_ID": "AMOUNT_020",
+      "Feature_Area": "Amount_Parsing",
+      "Description_VN": "Parse large decimal 1.5tr",
+      "User_Message_Input": "Chi 1.5tr mua máy ảnh",
+      "Precondition": "Any session",
+      "Expected_Bot_Response": "JSON chứa transaction",
+      "Expected_Parsed_Transaction": {
+        "transaction_type": "expense",
+        "amount": 1500000,
+        "currency": "VND",
+        "category_name": "Mua sắm"
+      },
+      "Target_Dimensions_CLASSS": ["A"],
+      "Target_OWASP_Risks": [],
+      "Target_CLASS_Principles": [],
+      "Priority": "High",
+      "Category": "Amount_Parsing",
+      "Notes": "1.5tr = 1.5 × 1,000,000 = 1,500,000"
+    }
+  ]
+}
+

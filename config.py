@@ -60,6 +60,40 @@ class TestConfig:
     accuracy_pass_threshold: float = 0.8  # Pass if >= 80%
     
     # ==========================================
+    # WORKLOAD EVALUATION THRESHOLDS
+    # ==========================================
+    # Concurrent users levels for scalability testing
+    concurrent_users_levels: list = field(default_factory=lambda: [10, 50, 100, 500])
+    
+    # Throughput thresholds (requests per second)
+    throughput_target_rps: int = 50  # Target requests per second
+    throughput_min_rps: int = 30    # Minimum acceptable
+    
+    # Latency percentiles (for workload tests)
+    p50_latency_max_ms: int = 2000   # 50th percentile (median)
+    p95_latency_max_ms: int = 5000   # 95th percentile
+    p99_latency_max_ms: int = 8000   # 99th percentile
+    
+    # Error rate thresholds
+    error_rate_max_percent: float = 1.0   # Maximum acceptable error rate (%)
+    error_rate_warning_percent: float = 0.5  # Warning threshold
+    
+    # Success rate thresholds
+    success_rate_min: float = 0.95   # Minimum success rate (95%)
+    success_rate_warning: float = 0.98  # Warning if below this (98%)
+    
+    # Cost thresholds per request
+    cost_per_request_max_vnd_simple: float = 1000    # Simple transaction
+    cost_per_request_max_vnd_complex: float = 5000   # Complex query
+    cost_per_request_warning_vnd: float = 500        # Warning threshold
+    
+    # Token usage limits
+    max_prompt_tokens_simple: int = 500    # Simple transaction
+    max_prompt_tokens_complex: int = 2000  # Complex query
+    max_completion_tokens_simple: int = 200
+    max_completion_tokens_complex: int = 800
+    
+    # ==========================================
     # FACTORY METHODS FOR DIFFERENT ENVIRONMENTS
     # ==========================================
     

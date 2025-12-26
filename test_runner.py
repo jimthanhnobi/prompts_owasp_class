@@ -107,6 +107,70 @@ class TestRunner:
         with open(self.results_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     
+    def _export_failed_tests(self):
+        """Export failed tests to separate file for analysis"""
+        # Get failed tests
+        failed_results = [
+            r for r in self.results 
+            if r.pass_fail in [PassFailStatus.FAIL, PassFailStatus.ERROR, PassFailStatus.PARTIAL]
+        ]
+        
+        if not failed_results:
+            # No failed tests, skip
+            return
+        
+        # Get failed test case IDs
+        failed_test_ids = {r.test_case_id for r in failed_results}
+        failed_test_cases = [
+            tc for tc in self.test_cases_data 
+            if tc.get("Test_Case_ID") in failed_test_ids
+        ]
+        
+        # Prepare failed tests data
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        failed_file = Path(self.config.results_dir) / f"failed_tests_{timestamp}.json"
+        
+        failed_data = {
+            "run_info": {
+                "timestamp": datetime.now().isoformat(),
+                "environment": self.config.environment,
+                "llm_model": self.config.llm_model,
+                "total_tests": self.summary.total_tests,
+                "failed_count": len(failed_results),
+                "fail_rate": (len(failed_results) / self.summary.total_tests * 100) if self.summary.total_tests > 0 else 0
+            },
+            "summary": {
+                "total_failed": len(failed_results),
+                "by_status": {},
+                "by_feature": {},
+                "by_priority": {}
+            },
+            "failed_results": [r.to_dict() for r in failed_results],
+            "failed_test_cases": failed_test_cases
+        }
+        
+        # Analyze failures
+        test_case_map = {tc.get("Test_Case_ID"): tc for tc in failed_test_cases}
+        
+        for result in failed_results:
+            # By status
+            status = result.pass_fail.value
+            failed_data["summary"]["by_status"][status] = failed_data["summary"]["by_status"].get(status, 0) + 1
+            
+            # By feature and priority
+            test_case = test_case_map.get(result.test_case_id, {})
+            feature = test_case.get("Feature_Area", "Unknown")
+            priority = test_case.get("Priority", "Unknown")
+            
+            failed_data["summary"]["by_feature"][feature] = failed_data["summary"]["by_feature"].get(feature, 0) + 1
+            failed_data["summary"]["by_priority"][priority] = failed_data["summary"]["by_priority"].get(priority, 0) + 1
+        
+        # Save to file
+        with open(failed_file, 'w', encoding='utf-8') as f:
+            json.dump(failed_data, f, ensure_ascii=False, indent=2)
+        
+        console.print(f"[yellow]Failed tests exported to: {failed_file}[/yellow]")
+    
     def run_single_test(self, test_case: TestCase) -> TestRunResult:
         """Run a single test case"""
         # Initialize session
@@ -137,6 +201,16 @@ class TestRunner:
                 ask_response.data or {}
             )
             
+            # Estimate token usage and calculate cost
+            token_usage = self.api_client.estimate_token_usage(
+                question=test_case.user_message_input,
+                answer=answer
+            )
+            cost_vnd = self.evaluator.calculate_cost(
+                prompt_tokens=token_usage["prompt_tokens"],
+                completion_tokens=token_usage["completion_tokens"]
+            )
+            
             # Evaluate
             result = self.evaluator.evaluate(
                 test_case=test_case,
@@ -144,6 +218,10 @@ class TestRunner:
                 actual_parsed=parsed_transaction,
                 latency_ms=ask_response.latency_ms
             )
+            
+            # Set token usage and cost
+            result.token_usage = token_usage
+            result.measured_cost_vnd = cost_vnd
         
         # Store raw data
         result.raw_request = {
@@ -223,7 +301,8 @@ class TestRunner:
         # Finalize results file
         self._finalize_results_file()
         
-        return self.results
+        # Export failed tests if any
+        self._export_failed_tests()
         
         return self.results
     

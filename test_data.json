@@ -1,0 +1,330 @@
+{
+  "members": [
+    {
+      "memberId": "bd79ba51-8b2b-40aa-8e29-23079f3349bb",
+      "displayName": "Tùng",
+      "relation": "con trai",
+      "birthDate": "2006-12-08",
+      "active": true,
+      "note": "con trai"
+    },
+    {
+      "memberId": "96f17d8a-f898-4826-b997-1ae8de85ebfe",
+      "displayName": "Trang",
+      "relation": "con gái",
+      "birthDate": "2010-12-25",
+      "active": true,
+      "note": "con gái"
+    },
+    {
+      "memberId": "6d41a461-9757-4cd3-b446-57a7bdd0ed3b",
+      "displayName": "Hiền",
+      "relation": "em",
+      "birthDate": "2003-12-25",
+      "active": true,
+      "note": "em gái"
+    }
+  ],
+  
+  "categories": [
+    {
+      "categoryId": "f8482b94-a8dc-4329-93db-9d855e3c9a44",
+      "code": "food",
+      "name": "Ăn uống",
+      "kind": "expense",
+      "parentId": null,
+      "icon": "mdi-food",
+      "color": "#FF7043",
+      "description": "Mọi chi phí ăn uống hằng ngày",
+      "jarId": "e01df176-8cb9-4590-a1ac-7abbf2655b44",
+      "jarCode": "NEC",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "1cef1f11-f230-48ee-b0f8-2fce1ed54a5a",
+      "code": "transport",
+      "name": "Di chuyển",
+      "kind": "expense",
+      "parentId": null,
+      "icon": "mdi-car",
+      "color": "#29B6F6",
+      "description": "Phí đi lại: xăng xe, Grab, vé tàu...",
+      "jarId": "e01df176-8cb9-4590-a1ac-7abbf2655b44",
+      "jarCode": "NEC",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "4bda5e44-3f9f-4aab-80de-fe9dbebc9149",
+      "code": "housing",
+      "name": "Nhà ở",
+      "kind": "expense",
+      "parentId": null,
+      "icon": "mdi-home",
+      "color": "#8D6E63",
+      "description": "Tiền thuê nhà, điện nước, Internet...",
+      "jarId": "248c8f3d-a776-43ce-8348-0a163178db26",
+      "jarCode": "LTSS",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "e2304f6d-58c8-4bb2-ab54-50dc644894a8",
+      "code": "shopping",
+      "name": "Mua sắm",
+      "kind": "expense",
+      "parentId": null,
+      "icon": "mdi-cart",
+      "color": "#AB47BC",
+      "description": "Mua đồ dùng cá nhân, quần áo...",
+      "jarId": "f0a4970e-bc84-406c-9f07-ac9e37d0bcc8",
+      "jarCode": "PLAY",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "63e01729-67e5-47ba-93fb-50d91eb076c3",
+      "code": "health",
+      "name": "Sức khỏe",
+      "kind": "expense",
+      "parentId": null,
+      "icon": "mdi-heart-pulse",
+      "color": "#E53935",
+      "description": "Thuốc men, khám chữa bệnh...",
+      "jarId": "e01df176-8cb9-4590-a1ac-7abbf2655b44",
+      "jarCode": "NEC",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "c3d28c91-8b5c-4c59-984a-5a6cc43cfde9",
+      "code": "education",
+      "name": "Học tập",
+      "kind": "expense",
+      "parentId": null,
+      "icon": "mdi-school",
+      "color": "#5C6BC0",
+      "description": "Sách vở, khóa học, học phí...",
+      "jarId": "0ca37fce-8a36-4e57-b563-c2bbaf24790a",
+      "jarCode": "EDU",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "67f84540-d9af-4e14-88fc-c0bc382d4130",
+      "code": "entertain",
+      "name": "Giải trí",
+      "kind": "expense",
+      "parentId": null,
+      "icon": "mdi-gamepad",
+      "color": "#FFB300",
+      "description": "Phim ảnh, nhậu nhẹt, tiệc tùng...",
+      "jarId": "f0a4970e-bc84-406c-9f07-ac9e37d0bcc8",
+      "jarCode": "PLAY",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "5e6cc567-bc9f-424d-8de6-8acf98096225",
+      "code": "gifts",
+      "name": "Quà tặng",
+      "kind": "expense",
+      "parentId": null,
+      "icon": "mdi-gift",
+      "color": "#EC407A",
+      "description": "Quà sinh nhật, biếu tặng...",
+      "jarId": "f248a1d7-631b-45fc-a145-a36f48375e7a",
+      "jarCode": "GIVE",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "6efd2ffe-dd3f-45bb-877a-134052673c69",
+      "code": "charity",
+      "name": "Từ thiện",
+      "kind": "expense",
+      "parentId": null,
+      "icon": "mdi-hand-heart",
+      "color": "#8E24AA",
+      "description": "Đóng góp, quyên góp...",
+      "jarId": "f248a1d7-631b-45fc-a145-a36f48375e7a",
+      "jarCode": "GIVE",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "77d7772b-014a-43ee-8b05-799fc0b4d4af",
+      "code": "salary",
+      "name": "Lương",
+      "kind": "income",
+      "parentId": null,
+      "icon": "mdi-cash",
+      "color": "#4CAF50",
+      "description": "Thu nhập chính từ công việc",
+      "jarId": "266bfea3-9af6-4409-832f-d4b0d5451d95",
+      "jarCode": "FFA",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "10866510-cfbe-47e9-ad7d-2be1623ad138",
+      "code": "bonus",
+      "name": "Thưởng",
+      "kind": "income",
+      "parentId": null,
+      "icon": "mdi-cash-multiple",
+      "color": "#66BB6A",
+      "description": "Thưởng hoặc thu nhập thêm",
+      "jarId": "266bfea3-9af6-4409-832f-d4b0d5451d95",
+      "jarCode": "FFA",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "836d64f2-8486-4979-95b8-aa1d4ea9b789",
+      "code": "interest",
+      "name": "Lãi đầu tư",
+      "kind": "income",
+      "parentId": null,
+      "icon": "mdi-chart-line",
+      "color": "#26A69A",
+      "description": "Lãi tiết kiệm, cổ tức...",
+      "jarId": "266bfea3-9af6-4409-832f-d4b0d5451d95",
+      "jarCode": "FFA",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "ff2b4942-878c-46c8-86b6-e29b65646ef2",
+      "code": "other",
+      "name": "Thu nhập khác",
+      "kind": "income",
+      "parentId": null,
+      "icon": "mdi-cash-plus",
+      "color": "#81C784",
+      "description": "Nguồn thu khác",
+      "jarId": "266bfea3-9af6-4409-832f-d4b0d5451d95",
+      "jarCode": "FFA",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "5c53ab0d-1984-40aa-8ffd-6bf32d51ab31",
+      "code": "saving",
+      "name": "Tiết kiệm",
+      "kind": "transfer",
+      "parentId": null,
+      "icon": "mdi-piggy-bank",
+      "color": "#FF9800",
+      "description": "Chuyển tiền tiết kiệm",
+      "jarId": "248c8f3d-a776-43ce-8348-0a163178db26",
+      "jarCode": "LTSS",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "6bf04f5a-88b4-4bc1-8aca-e34e42486858",
+      "code": "invest",
+      "name": "Đầu tư",
+      "kind": "transfer",
+      "parentId": null,
+      "icon": "mdi-finance",
+      "color": "#43A047",
+      "description": "Chuyển tiền đầu tư",
+      "jarId": "266bfea3-9af6-4409-832f-d4b0d5451d95",
+      "jarCode": "FFA",
+      "parentCode": null,
+      "active": true
+    },
+    {
+      "categoryId": "1ee157e0-e8f5-48a5-bbcb-990b8024b1e2",
+      "code": "otheric",
+      "name": "Chi tiêu khác",
+      "kind": "expense",
+      "parentId": null,
+      "icon": "mdi-dots-horizontal",
+      "color": "#757575",
+      "description": "Chi tiêu khác",
+      "jarId": null,
+      "jarCode": "OTA",
+      "parentCode": null,
+      "active": true
+    }
+  ],
+  
+  "jars": [
+    {
+      "jarId": "e01df176-8cb9-4590-a1ac-7abbf2655b44",
+      "jarCode": "NEC",
+      "name": "Necessities (Thiết yếu)",
+      "description": "Chi phí sống cần thiết: ăn, ở, đi lại",
+      "pctBp": 5500
+    },
+    {
+      "jarId": "f0a4970e-bc84-406c-9f07-ac9e37d0bcc8",
+      "jarCode": "PLAY",
+      "name": "Play (Vui chơi)",
+      "description": "Giải trí, mua sắm",
+      "pctBp": 1000
+    },
+    {
+      "jarId": "248c8f3d-a776-43ce-8348-0a163178db26",
+      "jarCode": "LTSS",
+      "name": "Long-term Saving (Tiết kiệm dài hạn)",
+      "description": "Tiết kiệm, nhà ở",
+      "pctBp": 1000
+    },
+    {
+      "jarId": "0ca37fce-8a36-4e57-b563-c2bbaf24790a",
+      "jarCode": "EDU",
+      "name": "Education (Giáo dục)",
+      "description": "Học tập, phát triển bản thân",
+      "pctBp": 1000
+    },
+    {
+      "jarId": "f248a1d7-631b-45fc-a145-a36f48375e7a",
+      "jarCode": "GIVE",
+      "name": "Give (Cho đi)",
+      "description": "Quà tặng, từ thiện",
+      "pctBp": 500
+    },
+    {
+      "jarId": "266bfea3-9af6-4409-832f-d4b0d5451d95",
+      "jarCode": "FFA",
+      "name": "Financial Freedom Account (Tự do tài chính)",
+      "description": "Đầu tư, thu nhập thụ động",
+      "pctBp": 1000
+    }
+  ],
+  
+  "amount_parsing_examples": [
+    {"input": "50k", "expected": 50000},
+    {"input": "50 K", "expected": 50000},
+    {"input": "100 nghìn", "expected": 100000},
+    {"input": "100 ngàn", "expected": 100000},
+    {"input": "3tr", "expected": 3000000},
+    {"input": "3 triệu", "expected": 3000000},
+    {"input": "3m", "expected": 3000000},
+    {"input": "3 củ", "expected": 3000000},
+    {"input": "2.5tr", "expected": 2500000},
+    {"input": "14tr99", "expected": 14990000},
+    {"input": "19m9", "expected": 19900000},
+    {"input": "nửa triệu", "expected": 500000},
+    {"input": "5 tỏi", "expected": 5000000000},
+    {"input": "5 tỷ", "expected": 5000000000},
+    {"input": "5b", "expected": 5000000000},
+    {"input": "nửa tỷ", "expected": 500000000}
+  ],
+  
+  "intent_priority": [
+    "unsupported (sensitive topics)",
+    "follow_up (corrections)",
+    "app_query (app usage)",
+    "financial_question (advice, not transaction yet)",
+    "transaction (already happened)",
+    "greeting",
+    "closing"
+  ]
+}
+

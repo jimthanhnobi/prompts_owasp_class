@@ -1,0 +1,122 @@
+{
+  "_comment": "Workload Evaluation Thresholds - Ngưỡng đánh giá workload cho MoneyCare Chatbot",
+  "version": "1.0.0",
+  "last_updated": "2025-12-25",
+  
+  "concurrent_users": {
+    "description": "Các mức concurrent users để test scalability",
+    "levels": [10, 50, 100, 500],
+    "notes": "Test với từng mức để xem hệ thống xử lý được bao nhiêu users đồng thời"
+  },
+  
+  "throughput": {
+    "description": "Throughput - số requests per second",
+    "target_rps": 50,
+    "min_rps": 30,
+    "unit": "requests/second",
+    "notes": "Hệ thống nên xử lý được ít nhất 30 rps, mục tiêu là 50 rps"
+  },
+  
+  "latency_percentiles": {
+    "description": "Latency percentiles - thời gian phản hồi ở các mức percentile",
+    "p50_max_ms": 2000,
+    "p95_max_ms": 5000,
+    "p99_max_ms": 8000,
+    "unit": "milliseconds",
+    "notes": "p50 = median, p95 = 95% requests < p95, p99 = 99% requests < p99"
+  },
+  
+  "error_rate": {
+    "description": "Tỷ lệ lỗi chấp nhận được",
+    "max_percent": 1.0,
+    "warning_percent": 0.5,
+    "unit": "percentage",
+    "notes": "Error rate không được vượt quá 1%, cảnh báo nếu > 0.5%"
+  },
+  
+  "success_rate": {
+    "description": "Tỷ lệ thành công",
+    "min": 0.95,
+    "warning": 0.98,
+    "unit": "ratio (0-1)",
+    "notes": "Success rate phải >= 95%, cảnh báo nếu < 98%"
+  },
+  
+  "cost_per_request": {
+    "description": "Chi phí tối đa cho mỗi request",
+    "simple_max_vnd": 1000,
+    "complex_max_vnd": 5000,
+    "warning_vnd": 500,
+    "unit": "VND",
+    "notes": "Simple transaction < 1000 VND, complex query < 5000 VND"
+  },
+  
+  "token_usage": {
+    "description": "Giới hạn token usage",
+    "simple": {
+      "max_prompt_tokens": 500,
+      "max_completion_tokens": 200,
+      "max_total_tokens": 700
+    },
+    "complex": {
+      "max_prompt_tokens": 2000,
+      "max_completion_tokens": 800,
+      "max_total_tokens": 2800
+    },
+    "unit": "tokens",
+    "notes": "Simple = transaction parse, Complex = financial advice/analysis"
+  },
+  
+  "workload_levels": {
+    "description": "Các mức workload để test",
+    "light": {
+      "concurrent_users": 10,
+      "expected_throughput_rps": 10,
+      "max_latency_ms": 3000,
+      "description": "Light load - normal usage"
+    },
+    "medium": {
+      "concurrent_users": 50,
+      "expected_throughput_rps": 30,
+      "max_latency_ms": 5000,
+      "description": "Medium load - peak hours"
+    },
+    "heavy": {
+      "concurrent_users": 100,
+      "expected_throughput_rps": 50,
+      "max_latency_ms": 8000,
+      "description": "Heavy load - high traffic"
+    },
+    "extreme": {
+      "concurrent_users": 500,
+      "expected_throughput_rps": 100,
+      "max_latency_ms": 10000,
+      "description": "Extreme load - stress test"
+    }
+  },
+  
+  "evaluation_criteria": {
+    "pass": {
+      "description": "Điều kiện để PASS",
+      "success_rate": ">= 0.95",
+      "error_rate": "< 0.01",
+      "avg_latency": "< p95_max_ms",
+      "throughput": ">= min_rps"
+    },
+    "warning": {
+      "description": "Điều kiện để WARNING",
+      "success_rate": ">= 0.90 và < 0.95",
+      "error_rate": ">= 0.005 và < 0.01",
+      "avg_latency": ">= p95_max_ms và < p99_max_ms",
+      "throughput": ">= min_rps * 0.8 và < min_rps"
+    },
+    "fail": {
+      "description": "Điều kiện để FAIL",
+      "success_rate": "< 0.90",
+      "error_rate": ">= 0.01",
+      "avg_latency": ">= p99_max_ms",
+      "throughput": "< min_rps * 0.8"
+    }
+  }
+}
+

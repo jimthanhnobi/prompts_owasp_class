@@ -28,7 +28,7 @@
         },
         "user": {
             "_comment": "Test như user đã login - cần JWT token",
-            "jwt_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDU1NTRiZC1iZTFlLTQ5MmMtOWU1YS02MmY1NzE5Y2RhOWEiLCJpc3MiOiJ2aWV0ZHVjIiwidXNlcklkIjoiMDA1NTU0YmQtYmUxZS00OTJjLTllNWEtNjJmNTcxOWNkYTlhIiwibmFtZSI6ImhpZW4gdGhpIiwicm9sZXMiOlsidXNlciJdLCJ0ZW5hbnRJZCI6InB1YmxpYyIsInVzZXJOYW1lIjoiY2h1ZWlmczMyNTYyOUBnbWFpbC5jb20iLCJpYXQiOjE3NjY1Nzg5NTIsImV4cCI6MTc2NjY2NTM1Mn0.vjAkJ7LcmsnasPTa4R26uJaFpRF3pBczT9VQXMDSSaM",
+            "jwt_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDU1NTRiZC1iZTFlLTQ5MmMtOWU1YS02MmY1NzE5Y2RhOWEiLCJpc3MiOiJ2aWV0ZHVjIiwidXNlcklkIjoiMDA1NTU0YmQtYmUxZS00OTJjLTllNWEtNjJmNTcxOWNkYTlhIiwibmFtZSI6ImhpZW4gdGhpIiwicm9sZXMiOlsidXNlciJdLCJ0ZW5hbnRJZCI6InB1YmxpYyIsInVzZXJOYW1lIjoiY2h1ZWlmczMyNTYyOUBnbWFpbC5jb20iLCJpYXQiOjE3NjY2ODQ2MjksImV4cCI6MTc2Njc3MTAyOX0.LtCeqY5XyxfK1P23quFvABjS86Jbgj4M0NLIPJ6_uug",
             "user_id": "005554bd-be1e-492c-9e5a-62f5719cda9a"
         }
     },

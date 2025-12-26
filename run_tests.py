@@ -4,8 +4,14 @@ Main entry point for running MoneyCare Chatbot tests
 """
 import argparse
 import sys
+import codecs
 from pathlib import Path
 from datetime import datetime
+
+# Fix encoding for Windows console
+if sys.platform == 'win32':
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
 
 from rich.console import Console
 from rich.panel import Panel
@@ -116,7 +122,7 @@ API URL: {args.url}
 Model: {args.model}
 Export Format: {args.export}
 """,
-        title="🧪 Test Configuration",
+        title="Test Configuration",
         border_style="blue"
     ))
     
@@ -124,22 +130,22 @@ Export Format: {args.export}
     runner = TestRunner(config)
     
     # Load test cases
-    console.print(f"\n📂 Loading test cases from: {args.test_file}")
+    console.print(f"\nLoading test cases from: {args.test_file}")
     try:
         test_cases = runner.load_test_cases(str(test_file))
-        console.print(f"✅ Loaded {len(test_cases)} test cases")
+        console.print(f"[green]Loaded {len(test_cases)} test cases[/green]")
     except Exception as e:
         console.print(f"[red]Error loading test cases: {e}[/red]")
         sys.exit(1)
     
     # Apply filters
     if args.feature:
-        console.print(f"🔍 Filtering by feature: {args.feature}")
+        console.print(f"Filtering by feature: {args.feature}")
     if args.priority:
-        console.print(f"🔍 Filtering by priority: {args.priority}")
+        console.print(f"Filtering by priority: {args.priority}")
     
     # Run tests
-    console.print("\n🚀 Starting test execution...\n")
+    console.print("\nStarting test execution...\n")
     
     try:
         results = runner.run_tests(
@@ -165,18 +171,43 @@ Export Format: {args.export}
     runner.print_failed_tests()
     
     # Generate report
-    console.print("\n📊 Generating report...")
+    console.print("\nGenerating report...")
     
-    if args.export == "excel":
-        report_gen = ReportGenerator(config)
-        report_path = report_gen.generate_excel_report(
-            runner.results,
-            runner.summary,
-            test_cases=test_cases  # Pass test cases for 01_Test_Cases sheet
-        )
-        console.print(f"[green]✅ Excel report saved to: {report_path}[/green]")
+    report_paths = []
+    
+    # Always generate JSON (already saved by TestRunner, but verify)
+    json_path = runner.results_file
+    if json_path and Path(json_path).exists():
+        console.print(f"[green]JSON report saved to: {json_path}[/green]")
+        report_paths.append(json_path)
     else:
-        report_path = runner.export_results(args.export)
+        json_path = runner.export_results("json")
+        console.print(f"[green]JSON report saved to: {json_path}[/green]")
+        report_paths.append(json_path)
+    
+    # Generate Excel if requested (default)
+    if args.export == "excel":
+        try:
+            report_gen = ReportGenerator(config)
+            excel_path = report_gen.generate_excel_report(
+                runner.results,
+                runner.summary,
+                test_cases=test_cases  # Pass test cases for category sheets
+            )
+            console.print(f"[green]Excel report saved to: {excel_path}[/green]")
+            report_paths.append(excel_path)
+        except Exception as e:
+            console.print(f"[red]Error generating Excel report: {e}[/red]")
+            if args.verbose:
+                import traceback
+                traceback.print_exc()
+    elif args.export != "json":
+        # Generate other formats (CSV, etc.)
+        other_path = runner.export_results(args.export)
+        console.print(f"[green]{args.export.upper()} report saved to: {other_path}[/green]")
+        report_paths.append(str(other_path))
+    
+    report_path = ", ".join(str(p) for p in report_paths) if report_paths else "N/A"
     
     # Final summary
     console.print(Panel(
@@ -185,9 +216,11 @@ Export Format: {args.export}
 Total: {runner.summary.total_tests}
 Passed: [green]{runner.summary.passed}[/green]
 Failed: [red]{runner.summary.failed}[/red]
+Partial: [yellow]{runner.summary.partial}[/yellow]
 Pass Rate: {runner.summary.pass_rate():.1f}%
 
-Report: {report_path}
+Reports:
+{chr(10).join('  ' + str(p) for p in report_paths) if report_paths else '  N/A'}
 """,
         title="📋 Summary",
         border_style="green" if runner.summary.failed == 0 else "red"

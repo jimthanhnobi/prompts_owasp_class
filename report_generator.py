@@ -5,7 +5,7 @@ Following LLM_Test_Design_Framework_Template.xlsx format
 import json
 import os
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from pathlib import Path
 
 import pandas as pd
@@ -59,29 +59,268 @@ class ReportGenerator:
         
         wb = Workbook()
         
-        # Sheet 1: 00_Framework_Overview
+        # Sheet 1: 00_Summary
         ws_overview = wb.active
-        ws_overview.title = "00_Framework_Overview"
+        ws_overview.title = "00_Summary"
         self._create_framework_overview(ws_overview, summary)
         
-        # Sheet 2: 01_Test_Results (merged Test_Cases + Test_Run_Log)
-        ws_results = wb.create_sheet("01_Test_Results")
-        self._create_merged_test_results(ws_results, test_cases or [], results)
+        # Group results by category
+        results_by_category, tc_map = self._group_results_by_category(results, test_cases or [])
         
-        # Sheet 4: 03_Metrics_C_L_A_S_S
-        ws_metrics = wb.create_sheet("02_Metrics_C_L_A_S_S")
+        # Sheet 2: 01_Test_Results_Functional
+        if results_by_category.get("Functional"):
+            ws_func = wb.create_sheet("01_Test_Results_Functional")
+            self._create_category_test_results(ws_func, results_by_category["Functional"], "Functional", tc_map)
+        
+        # Sheet 3: 02_Test_Results_OWASP
+        if results_by_category.get("Security"):
+            ws_owasp = wb.create_sheet("02_Test_Results_OWASP")
+            self._create_category_test_results(ws_owasp, results_by_category["Security"], "Security", tc_map)
+        
+        # Sheet 4: 03_Test_Results_CLASS
+        if results_by_category.get("C-L-A-S-S"):
+            ws_class = wb.create_sheet("03_Test_Results_CLASS")
+            self._create_category_test_results(ws_class, results_by_category["C-L-A-S-S"], "C-L-A-S-S", tc_map)
+        
+        # Sheet 5: 04_Test_Results_CLASS_Design
+        if results_by_category.get("CLASS_Design"):
+            ws_design = wb.create_sheet("04_Test_Results_CLASS_Design")
+            self._create_category_test_results(ws_design, results_by_category["CLASS_Design"], "CLASS_Design", tc_map)
+        
+        # Sheet 6: 05_Metrics_C_L_A_S_S
+        ws_metrics = wb.create_sheet("05_Metrics_C_L_A_S_S")
         self._create_metrics_classs(ws_metrics, results, summary)
         
-        # Sheet 5: 04_OWASP_Coverage
-        ws_owasp_cov = wb.create_sheet("03_OWASP_Coverage")
+        # Sheet 7: 06_OWASP_Coverage_Matrix
+        ws_owasp_cov = wb.create_sheet("06_OWASP_Coverage_Matrix")
         self._create_owasp_coverage(ws_owasp_cov, results)
         
-        # Sheet 6: 05_CLASS_Checklist
-        ws_class = wb.create_sheet("04_CLASS_Checklist")
-        self._create_class_checklist(ws_class, results)
+        # Sheet 8: 07_CLASS_Checklist
+        ws_class_checklist = wb.create_sheet("07_CLASS_Checklist")
+        self._create_class_checklist(ws_class_checklist, results)
+        
+        # Sheet 9: 08_Thresholds_Comparison
+        ws_thresholds = wb.create_sheet("08_Thresholds_Comparison")
+        self._create_thresholds_comparison(ws_thresholds, results, summary)
+        
+        # Sheet 10: 09_Workload_Analysis
+        ws_workload = wb.create_sheet("09_Workload_Analysis")
+        self._create_workload_analysis(ws_workload, results, summary)
         
         wb.save(output_path)
         return str(output_path)
+    
+    def _group_results_by_category(self, results: List[TestRunResult], test_cases: List[Dict]) -> Tuple[Dict[str, List], Dict]:
+        """Group test results by category and return test case map"""
+        # Create test case lookup with full info
+        tc_map = {}
+        for tc in test_cases:
+            if isinstance(tc, dict):
+                tc_id = tc.get("Test_Case_ID", "")
+                category = tc.get("Category", "")
+            else:
+                tc_id = getattr(tc, 'test_case_id', '')
+                category = getattr(tc, 'category', '')
+            if tc_id:
+                tc_map[tc_id] = {"category": category, "test_case": tc}
+        
+        # Group results
+        grouped = {
+            "Functional": [],
+            "Security": [],
+            "C-L-A-S-S": [],
+            "CLASS_Design": []
+        }
+        
+        for result in results:
+            tc_info = tc_map.get(result.test_case_id, {})
+            category = tc_info.get("category", "")
+            
+            if category in grouped:
+                grouped[category].append(result)
+            else:
+                # Try to infer from test case ID
+                if result.test_case_id.startswith("TC_"):
+                    grouped["Functional"].append(result)
+                elif result.test_case_id.startswith("SEC_"):
+                    grouped["Security"].append(result)
+                elif result.test_case_id.startswith("CLASSS_"):
+                    grouped["C-L-A-S-S"].append(result)
+                elif result.test_case_id.startswith("CLASS_"):
+                    grouped["CLASS_Design"].append(result)
+        
+        return grouped, tc_map
+    
+    def _create_category_test_results(self, ws, results: List[TestRunResult], category: str, tc_map: Dict):
+        """Create test results sheet for a specific category"""
+        headers = [
+            "Test_Case_ID", "Feature_Area", "Description_VN", "Priority",
+            "User_Message_Input", "Expected_Response", "Actual_Response",
+            "Pass_Fail", "Accuracy_%", "Latency_ms", "Cost_VND",
+            "Security_Status", "Stability_Status"
+        ]
+        
+        # Add category-specific columns
+        if category == "Security":
+            headers.append("OWASP_Risks")
+            headers.append("OWASP_Result")
+        elif category in ["C-L-A-S-S", "CLASS_Design"]:
+            headers.append("CLASS_Dimensions")
+            if category == "CLASS_Design":
+                headers.append("CLASS_Principles")
+        
+        headers.append("Notes")
+        
+        self._apply_header_style(ws, 1, headers)
+        
+        row_idx = 2
+        for result in results:
+            col = 1
+            
+            # Get test case info
+            tc_info = tc_map.get(result.test_case_id, {})
+            tc = tc_info.get("test_case", {})
+            
+            # Extract test case info
+            if isinstance(tc, dict):
+                feature = tc.get("Feature_Area", "")
+                desc = tc.get("Description_VN", "")
+                priority = tc.get("Priority", "Medium")
+                user_msg = tc.get("User_Message_Input", "")
+                expected_resp = tc.get("Expected_Bot_Response", "")
+            else:
+                feature = getattr(tc, 'feature_area', '')
+                desc = getattr(tc, 'description_vn', '')
+                priority = getattr(tc, 'priority', 'Medium')
+                user_msg = getattr(tc, 'user_message_input', '')
+                expected_resp = getattr(tc, 'expected_bot_response', '')
+            
+            # Basic info
+            ws.cell(row=row_idx, column=col, value=result.test_case_id).border = self.thin_border
+            col += 1
+            ws.cell(row=row_idx, column=col, value=feature).border = self.thin_border
+            col += 1
+            ws.cell(row=row_idx, column=col, value=desc).border = self.thin_border
+            col += 1
+            ws.cell(row=row_idx, column=col, value=priority).border = self.thin_border
+            col += 1
+            ws.cell(row=row_idx, column=col, value=user_msg).border = self.thin_border
+            col += 1
+            ws.cell(row=row_idx, column=col, value=expected_resp).border = self.thin_border
+            col += 1
+            
+            # Actual response
+            actual_resp = result.actual_bot_response or ""
+            if len(actual_resp) > 150:
+                actual_resp = actual_resp[:150] + "..."
+            ws.cell(row=row_idx, column=col, value=actual_resp).border = self.thin_border
+            col += 1
+            
+            # Pass/Fail with color
+            status_cell = ws.cell(row=row_idx, column=col, value=result.pass_fail.value)
+            status_cell.border = self.thin_border
+            if result.pass_fail == PassFailStatus.PASS:
+                status_cell.fill = self.pass_fill
+            elif result.pass_fail == PassFailStatus.FAIL:
+                status_cell.fill = self.fail_fill
+            elif result.pass_fail == PassFailStatus.PARTIAL:
+                status_cell.fill = self.partial_fill
+            col += 1
+            
+            ws.cell(row=row_idx, column=col, value=f"{result.accuracy_score_percent:.1f}").border = self.thin_border
+            col += 1
+            ws.cell(row=row_idx, column=col, value=result.measured_latency_ms).border = self.thin_border
+            col += 1
+            ws.cell(row=row_idx, column=col, value=f"{result.measured_cost_vnd:.0f}").border = self.thin_border
+            col += 1
+            
+            # Security status
+            sec_cell = ws.cell(row=row_idx, column=col, value=result.security_observation.value)
+            sec_cell.border = self.thin_border
+            if result.security_observation.value != "OK":
+                sec_cell.fill = self.fail_fill
+            col += 1
+            
+            # Stability status
+            stab_cell = ws.cell(row=row_idx, column=col, value=result.stability_observation.value)
+            stab_cell.border = self.thin_border
+            if result.stability_observation.value not in ["OK", "High_latency"]:
+                stab_cell.fill = self.fail_fill
+            elif result.stability_observation.value == "High_latency":
+                stab_cell.fill = self.partial_fill
+            col += 1
+            
+            # Category-specific columns
+            if category == "Security":
+                # OWASP Risks
+                owasp_risks = ""
+                if isinstance(tc, dict):
+                    risks = tc.get("Target_OWASP_Risks", [])
+                else:
+                    risks = getattr(tc, 'target_owasp_risks', [])
+                owasp_risks = ",".join(risks) if isinstance(risks, list) else str(risks or "")
+                ws.cell(row=row_idx, column=col, value=owasp_risks).border = self.thin_border
+                col += 1
+                
+                # OWASP Result
+                owasp_result = ""
+                if result.owasp_check:
+                    parts = []
+                    for risk_id, status in result.owasp_check.items():
+                        if status == "OK":
+                            parts.append(f"{risk_id}:✓")
+                        else:
+                            parts.append(f"{risk_id}:✗ {status}")
+                    owasp_result = "; ".join(parts)
+                
+                owasp_cell = ws.cell(row=row_idx, column=col, value=owasp_result)
+                owasp_cell.border = self.thin_border
+                if "✗" in owasp_result:
+                    owasp_cell.fill = self.fail_fill
+                elif owasp_result:
+                    owasp_cell.fill = self.pass_fill
+                col += 1
+            
+            elif category in ["C-L-A-S-S", "CLASS_Design"]:
+                # CLASS Dimensions
+                class_dims = ""
+                if isinstance(tc, dict):
+                    dims = tc.get("Target_Dimensions_CLASSS", [])
+                else:
+                    dims = getattr(tc, 'target_dimensions_classs', [])
+                class_dims = ",".join(dims) if isinstance(dims, list) else str(dims or "")
+                ws.cell(row=row_idx, column=col, value=class_dims).border = self.thin_border
+                col += 1
+                
+                if category == "CLASS_Design":
+                    # CLASS Principles
+                    class_principles = ""
+                    if isinstance(tc, dict):
+                        principles = tc.get("Target_CLASS_Principles", [])
+                    else:
+                        principles = getattr(tc, 'target_class_principles', [])
+                    class_principles = ",".join(principles) if isinstance(principles, list) else str(principles or "")
+                    ws.cell(row=row_idx, column=col, value=class_principles).border = self.thin_border
+                    col += 1
+            
+            # Notes
+            ws.cell(row=row_idx, column=col, value=result.notes or "").border = self.thin_border
+            
+            row_idx += 1
+        
+        # Set column widths dynamically based on number of columns
+        num_cols = len(headers)
+        base_widths = [15, 15, 40, 10, 40, 35, 40, 10, 10, 12, 12, 15, 15]  # Base columns
+        if category == "Security":
+            base_widths.extend([20, 30])  # OWASP columns
+        elif category == "C-L-A-S-S":
+            base_widths.append(20)  # CLASS Dimensions
+        elif category == "CLASS_Design":
+            base_widths.extend([20, 25])  # CLASS Dimensions + Principles
+        base_widths.append(50)  # Notes
+        
+        for i, w in enumerate(base_widths[:num_cols]):
+            ws.column_dimensions[chr(65 + i)].width = w
     
     def _apply_header_style(self, ws, row, headers):
         """Apply header style to a row"""
@@ -508,3 +747,270 @@ class ReportGenerator:
         widths = [30, 70, 15, 20, 40, 12, 40]
         for i, w in enumerate(widths):
             ws.column_dimensions[chr(65 + i)].width = w
+    def _create_class_metrics_explanation(self, ws):
+        """Create 05_CLASS_Metrics_Explanation sheet"""
+        headers = ["Dimension", "Metric", "Description", "Unit", "Threshold", "Calculation", "Notes"]
+        self._apply_header_style(ws, 1, headers)
+        
+        data = [
+            # C - Cost
+            ("C", "Cost", "Chi phí vận hành chatbot", "VND", "< 1000 (simple), < 5000 (complex)", 
+             "cost_vnd = (input_tokens/1000 * input_rate + output_tokens/1000 * output_rate) * usd_to_vnd_rate",
+             "Chi phí phụ thuộc vào token usage và model pricing"),
+            ("C", "Prompt Tokens", "Số token trong input prompt", "tokens", "< 500 (simple), < 2000 (complex)",
+             "Đếm từ prompt gửi đến LLM", "Prompt càng dài, cost càng cao"),
+            ("C", "Completion Tokens", "Số token trong output response", "tokens", "< 200 (simple), < 800 (complex)",
+             "Đếm từ response nhận về", "Response càng dài, cost càng cao"),
+            ("C", "Total Tokens", "Tổng số token", "tokens", "< 700 (simple), < 2800 (complex)",
+             "prompt_tokens + completion_tokens", "Tổng token usage"),
+            
+            # L - Latency
+            ("L", "Latency", "Thời gian phản hồi", "ms", "< 3000 (simple), < 5000 (complex)",
+             "end_time - start_time", "Thời gian từ request đến response"),
+            ("L", "P50 Latency", "Median latency (50th percentile)", "ms", "< 2000",
+             "50th percentile của latencies", "50% requests < P50"),
+            ("L", "P95 Latency", "95th percentile latency", "ms", "< 5000",
+             "95th percentile của latencies", "95% requests < P95"),
+            ("L", "P99 Latency", "99th percentile latency", "ms", "< 8000",
+             "99th percentile của latencies", "99% requests < P99"),
+            
+            # A - Accuracy
+            ("A", "Accuracy Score", "Độ chính xác tổng thể", "%", ">= 80",
+             "(correct_fields / total_fields) * 100", "Tỷ lệ fields parse đúng"),
+            ("A", "Amount Accuracy", "Độ chính xác parse amount", "%", ">= 95",
+             "amount_correct / amount_total * 100", "Critical field, phải >= 95%"),
+            ("A", "Category Accuracy", "Độ chính xác parse category", "%", ">= 85",
+             "category_correct / category_total * 100", "Medium importance"),
+            ("A", "Type Accuracy", "Độ chính xác detect transaction type", "%", ">= 90",
+             "type_correct / type_total * 100", "High importance"),
+            ("A", "Date Accuracy", "Độ chính xác parse date", "%", ">= 80",
+             "date_correct / date_total * 100", "Low importance, >= 80% acceptable"),
+            ("A", "Intent Accuracy", "Độ chính xác detect intent", "%", ">= 90",
+             "intent_correct / intent_total * 100", "High importance"),
+            
+            # S1 - Scalability
+            ("S1", "Concurrent Users", "Số users đồng thời", "count", "10, 50, 100, 500",
+             "Số requests đồng thời", "Test với các mức khác nhau"),
+            ("S1", "Throughput", "Requests per second", "rps", ">= 50",
+             "total_requests / duration_seconds", "Số requests xử lý được mỗi giây"),
+            ("S1", "Success Rate", "Tỷ lệ thành công", "%", ">= 95",
+             "successful_requests / total_requests * 100", "Phải >= 95%"),
+            ("S1", "Error Rate", "Tỷ lệ lỗi", "%", "< 1",
+             "failed_requests / total_requests * 100", "Phải < 1%"),
+            
+            # S2 - Stability
+            ("S2", "No Crash", "Không crash", "boolean", "True",
+             "Check if system crashed", "System phải không crash"),
+            ("S2", "Meaningful Response", "Response có ý nghĩa", "boolean", "True",
+             "Check if response is meaningful", "Response phải có ý nghĩa"),
+            ("S2", "Consistency", "Tính nhất quán", "boolean", "True",
+             "Check if same input gives same output", "Cùng input phải cho cùng output"),
+            ("S2", "Error Handling", "Xử lý lỗi đúng cách", "boolean", "True",
+             "Check if errors are handled gracefully", "Lỗi phải được handle đúng cách"),
+        ]
+        
+        row_idx = 2
+        for row_data in data:
+            for col, value in enumerate(row_data, start=1):
+                cell = ws.cell(row=row_idx, column=col, value=value)
+                cell.border = self.thin_border
+                if col == 1:  # Dimension column
+                    cell.font = Font(bold=True)
+            row_idx += 1
+        
+        # Set column widths
+        widths = [12, 20, 40, 10, 30, 60, 50]
+        for i, w in enumerate(widths):
+            ws.column_dimensions[chr(65 + i)].width = w
+    
+    def _create_thresholds_comparison(self, ws, results: List[TestRunResult], summary: TestSummary):
+        """Create 06_Thresholds_Comparison sheet"""
+        headers = [
+            "Metric", "Threshold", "Actual", "Status", "Difference", "Percentage", "Notes"
+        ]
+        self._apply_header_style(ws, 1, headers)
+        
+        # Calculate actual values
+        latencies = [r.measured_latency_ms for r in results if r.measured_latency_ms > 0]
+        costs = [r.measured_cost_vnd for r in results if r.measured_cost_vnd > 0]
+        accuracies = [r.accuracy_score_percent for r in results if r.accuracy_score_percent > 0]
+        
+        avg_latency = sum(latencies) / len(latencies) if latencies else 0
+        p95_latency = sorted(latencies)[int(len(latencies) * 0.95)] if len(latencies) > 0 else 0
+        avg_cost = sum(costs) / len(costs) if costs else 0
+        avg_accuracy = sum(accuracies) / len(accuracies) if accuracies else 0
+        
+        # Compare with thresholds
+        comparisons = [
+            {
+                "metric": "Average Latency",
+                "threshold": self.config.latency_warning_ms,
+                "actual": avg_latency,
+                "unit": "ms"
+            },
+            {
+                "metric": "P95 Latency",
+                "threshold": self.config.p95_latency_max_ms,
+                "actual": p95_latency,
+                "unit": "ms"
+            },
+            {
+                "metric": "Average Cost per Request",
+                "threshold": self.config.cost_per_request_max_vnd_simple,
+                "actual": avg_cost,
+                "unit": "VND"
+            },
+            {
+                "metric": "Average Accuracy",
+                "threshold": self.config.accuracy_pass_threshold * 100,
+                "actual": avg_accuracy,
+                "unit": "%"
+            },
+            {
+                "metric": "Success Rate",
+                "threshold": self.config.success_rate_min * 100,
+                "actual": summary.pass_rate(),
+                "unit": "%"
+            },
+        ]
+        
+        row_idx = 2
+        for comp in comparisons:
+            threshold = comp["threshold"]
+            actual = comp["actual"]
+            unit = comp["unit"]
+            
+            # Determine status
+            if comp["metric"] in ["Average Latency", "P95 Latency", "Average Cost per Request"]:
+                # Lower is better
+                if actual <= threshold:
+                    status = "✅ Pass"
+                    status_color = self.pass_fill
+                elif actual <= threshold * 1.5:
+                    status = "⚠️ Warning"
+                    status_color = self.partial_fill
+                else:
+                    status = "❌ Fail"
+                    status_color = self.fail_fill
+            else:
+                # Higher is better
+                if actual >= threshold:
+                    status = "✅ Pass"
+                    status_color = self.pass_fill
+                elif actual >= threshold * 0.9:
+                    status = "⚠️ Warning"
+                    status_color = self.partial_fill
+                else:
+                    status = "❌ Fail"
+                    status_color = self.fail_fill
+            
+            # Calculate difference
+            if comp["metric"] in ["Average Latency", "P95 Latency", "Average Cost per Request"]:
+                diff = actual - threshold
+                percentage = (actual / threshold - 1) * 100 if threshold > 0 else 0
+            else:
+                diff = actual - threshold
+                percentage = (actual / threshold - 1) * 100 if threshold > 0 else 0
+            
+            ws.cell(row=row_idx, column=1, value=comp["metric"]).border = self.thin_border
+            ws.cell(row=row_idx, column=2, value=f"{threshold} {unit}").border = self.thin_border
+            ws.cell(row=row_idx, column=3, value=f"{actual:.2f} {unit}").border = self.thin_border
+            
+            status_cell = ws.cell(row=row_idx, column=4, value=status)
+            status_cell.border = self.thin_border
+            status_cell.fill = status_color
+            
+            ws.cell(row=row_idx, column=5, value=f"{diff:+.2f} {unit}").border = self.thin_border
+            ws.cell(row=row_idx, column=6, value=f"{percentage:+.1f}%").border = self.thin_border
+            
+            # Notes
+            if status == "❌ Fail":
+                notes = f"Actual value {'exceeds' if diff > 0 else 'below'} threshold by {abs(percentage):.1f}%"
+            elif status == "⚠️ Warning":
+                notes = f"Approaching threshold limit"
+            else:
+                notes = "Within acceptable range"
+            
+            ws.cell(row=row_idx, column=7, value=notes).border = self.thin_border
+            
+            row_idx += 1
+        
+        # Set column widths
+        widths = [25, 20, 20, 15, 20, 15, 40]
+        for i, w in enumerate(widths):
+            ws.column_dimensions[chr(65 + i)].width = w
+    
+    def _create_workload_analysis(self, ws, results: List[TestRunResult], summary: TestSummary):
+        """Create 07_Workload_Analysis sheet"""
+        headers = [
+            "Workload_Level", "Concurrent_Users", "Total_Requests", "Successful", "Failed",
+            "Success_Rate_%", "Error_Rate_%", "Avg_Latency_ms", "P95_Latency_ms", "P99_Latency_ms",
+            "Throughput_rps", "Avg_Cost_VND", "Status", "Notes"
+        ]
+        self._apply_header_style(ws, 1, headers)
+        
+        # Group results by workload level (if available)
+        # For now, show overall statistics
+        latencies = [r.measured_latency_ms for r in results if r.measured_latency_ms > 0]
+        costs = [r.measured_cost_vnd for r in results if r.measured_cost_vnd > 0]
+        
+        if latencies:
+            sorted_latencies = sorted(latencies)
+            p50 = sorted_latencies[int(len(sorted_latencies) * 0.50)] if len(sorted_latencies) > 0 else 0
+            p95 = sorted_latencies[int(len(sorted_latencies) * 0.95)] if len(sorted_latencies) > 0 else 0
+            p99 = sorted_latencies[int(len(sorted_latencies) * 0.99)] if len(sorted_latencies) > 0 else 0
+        else:
+            p50 = p95 = p99 = 0
+        
+        avg_latency = sum(latencies) / len(latencies) if latencies else 0
+        avg_cost = sum(costs) / len(costs) if costs else 0
+        
+        # Calculate success/error rates
+        total = summary.total_tests
+        successful = summary.passed
+        failed = summary.failed
+        success_rate = (successful / total * 100) if total > 0 else 0
+        error_rate = (failed / total * 100) if total > 0 else 0
+        
+        # Estimate throughput (assuming test duration)
+        # This is a placeholder - actual throughput should be measured during concurrent tests
+        estimated_throughput = 0  # Would need actual test duration
+        
+        # Determine status
+        if success_rate >= 95 and error_rate < 1 and p95 < self.config.p95_latency_max_ms:
+            status = "✅ Pass"
+            status_color = self.pass_fill
+        elif success_rate >= 90 and error_rate < 5:
+            status = "⚠️ Warning"
+            status_color = self.partial_fill
+        else:
+            status = "❌ Fail"
+            status_color = self.fail_fill
+        
+        row_idx = 2
+        # Overall row
+        ws.cell(row=row_idx, column=1, value="Overall").border = self.thin_border
+        ws.cell(row=row_idx, column=2, value="N/A").border = self.thin_border
+        ws.cell(row=row_idx, column=3, value=total).border = self.thin_border
+        ws.cell(row=row_idx, column=4, value=successful).border = self.thin_border
+        ws.cell(row=row_idx, column=5, value=failed).border = self.thin_border
+        ws.cell(row=row_idx, column=6, value=f"{success_rate:.1f}").border = self.thin_border
+        ws.cell(row=row_idx, column=7, value=f"{error_rate:.1f}").border = self.thin_border
+        ws.cell(row=row_idx, column=8, value=f"{avg_latency:.0f}").border = self.thin_border
+        ws.cell(row=row_idx, column=9, value=f"{p95:.0f}").border = self.thin_border
+        ws.cell(row=row_idx, column=10, value=f"{p99:.0f}").border = self.thin_border
+        ws.cell(row=row_idx, column=11, value=f"{estimated_throughput:.1f}").border = self.thin_border
+        ws.cell(row=row_idx, column=12, value=f"{avg_cost:.0f}").border = self.thin_border
+        
+        status_cell = ws.cell(row=row_idx, column=13, value=status)
+        status_cell.border = self.thin_border
+        status_cell.fill = status_color
+        
+        notes = f"Overall test results. P50 latency: {p50:.0f}ms"
+        ws.cell(row=row_idx, column=14, value=notes).border = self.thin_border
+        
+        # Set column widths
+        widths = [18, 15, 12, 12, 12, 12, 12, 15, 15, 15, 15, 15, 12, 40]
+        for i, w in enumerate(widths):
+            ws.column_dimensions[chr(65 + i)].width = w
+

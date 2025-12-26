@@ -433,6 +433,239 @@
             ],
             "Target_OWASP_Risks": [],
             "Priority": "High"
+        },
+        {
+            "Test_Case_ID": "CLASSS_C_004",
+            "Feature_Area": "Cost",
+            "Description_VN": "Đo token usage cho transaction với category phức tạp",
+            "User_Message_Input": "chi 200k mua quần áo cho con",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "Transaction parsed successfully",
+            "Expected_Metrics": {
+                "max_prompt_tokens": 600,
+                "max_completion_tokens": 250,
+                "max_total_tokens": 850
+            },
+            "Target_Dimensions_CLASSS": ["C"],
+            "Target_OWASP_Risks": [],
+            "Target_CLASS_Principles": [],
+            "Priority": "Medium"
+        },
+        {
+            "Test_Case_ID": "CLASSS_C_005",
+            "Feature_Area": "Cost",
+            "Description_VN": "Đo token usage cho transaction với date cụ thể",
+            "User_Message_Input": "hôm qua chi 150k đi taxi",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "Transaction parsed with date",
+            "Expected_Metrics": {
+                "max_prompt_tokens": 550,
+                "max_completion_tokens": 220,
+                "max_total_tokens": 770
+            },
+            "Target_Dimensions_CLASSS": ["C"],
+            "Target_OWASP_Risks": [],
+            "Target_CLASS_Principles": [],
+            "Priority": "Medium"
+        },
+        {
+            "Test_Case_ID": "CLASSS_L_004",
+            "Feature_Area": "Latency",
+            "Description_VN": "Latency cho transaction với nhiều thông tin",
+            "User_Message_Input": "chi 500k mua laptop cho công việc hôm qua",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "Transaction parsed",
+            "Expected_Metrics": {
+                "max_latency_ms": 4000,
+                "target_latency_ms": 3000
+            },
+            "Target_Dimensions_CLASSS": ["L"],
+            "Target_OWASP_Risks": [],
+            "Target_CLASS_Principles": [],
+            "Priority": "Medium"
+        },
+        {
+            "Test_Case_ID": "CLASSS_L_005",
+            "Feature_Area": "Latency",
+            "Description_VN": "Latency cho greeting message",
+            "User_Message_Input": "Xin chào",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "Greeting response",
+            "Expected_Metrics": {
+                "max_latency_ms": 1000,
+                "target_latency_ms": 500
+            },
+            "Target_Dimensions_CLASSS": ["L"],
+            "Target_OWASP_Risks": [],
+            "Target_CLASS_Principles": [],
+            "Priority": "Low"
+        },
+        {
+            "Test_Case_ID": "CLASSS_A_012",
+            "Feature_Area": "Accuracy",
+            "Description_VN": "Accuracy - Parse amount với 'nghìn'",
+            "User_Message_Input": "chi 50 nghìn",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "amount = 50000",
+            "Expected_Parsed_Transaction": {
+                "amount": 50000
+            },
+            "Target_Dimensions_CLASSS": ["A"],
+            "Accuracy_Fields": ["amount"],
+            "Priority": "High"
+        },
+        {
+            "Test_Case_ID": "CLASSS_A_013",
+            "Feature_Area": "Accuracy",
+            "Description_VN": "Accuracy - Parse amount với 'đồng'",
+            "User_Message_Input": "nhận 100000 đồng",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "amount = 100000",
+            "Expected_Parsed_Transaction": {
+                "amount": 100000
+            },
+            "Target_Dimensions_CLASSS": ["A"],
+            "Accuracy_Fields": ["amount"],
+            "Priority": "High"
+        },
+        {
+            "Test_Case_ID": "CLASSS_A_014",
+            "Feature_Area": "Accuracy",
+            "Description_VN": "Accuracy - Parse amount với số lớn (10 triệu)",
+            "User_Message_Input": "chi 10 triệu mua xe",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "amount = 10000000",
+            "Expected_Parsed_Transaction": {
+                "amount": 10000000
+            },
+            "Target_Dimensions_CLASSS": ["A"],
+            "Accuracy_Fields": ["amount"],
+            "Priority": "High"
+        },
+        {
+            "Test_Case_ID": "CLASSS_A_015",
+            "Feature_Area": "Accuracy",
+            "Description_VN": "Accuracy - Category mapping Mua sắm",
+            "User_Message_Input": "chi 300k mua quần áo",
+            "Precondition": "User has category 'Mua sắm'",
+            "Expected_Bot_Response": "category = Mua sắm",
+            "Expected_Parsed_Transaction": {
+                "category_name": "Mua sắm"
+            },
+            "Target_Dimensions_CLASSS": ["A"],
+            "Accuracy_Fields": ["category_name"],
+            "Priority": "High"
+        },
+        {
+            "Test_Case_ID": "CLASSS_A_016",
+            "Feature_Area": "Accuracy",
+            "Description_VN": "Accuracy - Category mapping Giải trí",
+            "User_Message_Input": "chi 200k xem phim",
+            "Precondition": "User has category 'Giải trí'",
+            "Expected_Bot_Response": "category = Giải trí",
+            "Expected_Parsed_Transaction": {
+                "category_name": "Giải trí"
+            },
+            "Target_Dimensions_CLASSS": ["A"],
+            "Accuracy_Fields": ["category_name"],
+            "Priority": "High"
+        },
+        {
+            "Test_Case_ID": "CLASSS_A_017",
+            "Feature_Area": "Accuracy",
+            "Description_VN": "Accuracy - Date parsing 'ngày mai'",
+            "User_Message_Input": "ngày mai chi 50k",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "date = tomorrow",
+            "Expected_Parsed_Transaction": {
+                "transaction_date": "tomorrow"
+            },
+            "Target_Dimensions_CLASSS": ["A"],
+            "Accuracy_Fields": ["transaction_date"],
+            "Priority": "Medium"
+        },
+        {
+            "Test_Case_ID": "CLASSS_A_018",
+            "Feature_Area": "Accuracy",
+            "Description_VN": "Accuracy - Date parsing với format 'dd/mm/yyyy'",
+            "User_Message_Input": "chi 100k ngày 25/12/2024",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "date = 2024-12-25",
+            "Expected_Parsed_Transaction": {
+                "transaction_date": "2024-12-25"
+            },
+            "Target_Dimensions_CLASSS": ["A"],
+            "Accuracy_Fields": ["transaction_date"],
+            "Priority": "Medium"
+        },
+        {
+            "Test_Case_ID": "CLASSS_A_019",
+            "Feature_Area": "Accuracy",
+            "Description_VN": "Accuracy - Intent detection greeting",
+            "User_Message_Input": "Chào bạn",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "intent = greeting",
+            "Expected_Intent": "greeting",
+            "Target_Dimensions_CLASSS": ["A"],
+            "Accuracy_Fields": ["intent"],
+            "Priority": "Medium"
+        },
+        {
+            "Test_Case_ID": "CLASSS_A_020",
+            "Feature_Area": "Accuracy",
+            "Description_VN": "Accuracy - Intent detection closing",
+            "User_Message_Input": "Cảm ơn, tạm biệt",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "intent = closing",
+            "Expected_Intent": "closing",
+            "Target_Dimensions_CLASSS": ["A"],
+            "Accuracy_Fields": ["intent"],
+            "Priority": "Medium"
+        },
+        {
+            "Test_Case_ID": "CLASSS_S1_003",
+            "Feature_Area": "Scalability",
+            "Description_VN": "Scalability - 20 concurrent requests",
+            "User_Message_Input": "chi 50k test",
+            "Precondition": "20 concurrent sessions",
+            "Expected_Bot_Response": "All requests processed",
+            "Expected_Metrics": {
+                "concurrent_requests": 20,
+                "max_avg_latency_ms": 6000,
+                "success_rate_min": 0.95
+            },
+            "Target_Dimensions_CLASSS": ["S"],
+            "Target_OWASP_Risks": [],
+            "Priority": "Medium"
+        },
+        {
+            "Test_Case_ID": "CLASSS_S2_006",
+            "Feature_Area": "Stability",
+            "Description_VN": "Stability - Very long message",
+            "User_Message_Input": "chi 50k test test test test test test test test test test",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "Parse transaction or graceful handling",
+            "Expected_Metrics": {
+                "no_crash": true,
+                "meaningful_response": true
+            },
+            "Target_Dimensions_CLASSS": ["S"],
+            "Target_OWASP_Risks": [],
+            "Priority": "Medium"
+        },
+        {
+            "Test_Case_ID": "CLASSS_S2_007",
+            "Feature_Area": "Stability",
+            "Description_VN": "Stability - Unicode characters",
+            "User_Message_Input": "chi 50k ăn trưa",
+            "Precondition": "Any session",
+            "Expected_Bot_Response": "Parse transaction or graceful handling",
+            "Expected_Metrics": {
+                "no_crash": true
+            },
+            "Target_Dimensions_CLASSS": ["S"],
+            "Target_OWASP_Risks": [],
+            "Priority": "Medium"
         }
     ]
 }

@@ -45,7 +45,9 @@ class TestEvaluator:
         if error:
             result.pass_fail = PassFailStatus.ERROR
             result.stability_observation = StabilityObservation.ERROR
-            result.notes = f"Error: {error}"
+            result.notes = f"Error occurred: {error}. "
+            result.notes += f"Test case: {test_case.test_case_id}. "
+            result.notes += f"Input: {test_case.user_message_input[:100]}. "
             result.issues_found = True
             return result
         
@@ -212,151 +214,263 @@ class TestEvaluator:
             result.accuracy_score_percent = 0.0
             result.pass_fail = PassFailStatus.FAIL
             result.notes += "No parsed transaction in response. "
+            result.notes += f"Expected fields: {list(expected.keys())}. "
+            result.notes += "Bot response may not contain transaction data or parsing failed. "
             return
         
-        # Define field categories
-        CRITICAL_FIELDS = {"transaction_type", "amount", "currency", "transactions_count"}
-        FLEXIBLE_FIELDS = {"category_name", "category_id", "description", "member_id", "display_name", "types"}
+        # Define field categories with weights
+        # Critical fields: Must match exactly (type, amount)
+        # Important fields: Should match closely (category)
+        # Minor fields: Can vary (description, date)
+        CRITICAL_FIELDS = {"transaction_type", "amount", "transactions_count"}
+        IMPORTANT_FIELDS = {"category_name", "currency"}
+        MINOR_FIELDS = {"description", "member_id", "display_name", "category_id", "transaction_date", "types"}
         
-        critical_total = 0
-        critical_correct = 0
-        flexible_total = 0
-        flexible_correct = 0
+        # Field weights for scoring
+        FIELD_WEIGHTS = {
+            "transaction_type": 0.30,  # Critical
+            "amount": 0.30,            # Critical
+            "transactions_count": 0.10, # Critical (for multi-tx)
+            "category_name": 0.15,     # Important
+            "currency": 0.05,          # Important
+            "description": 0.05,       # Minor
+            "transaction_date": 0.03,  # Minor
+            "member_id": 0.01,         # Minor
+            "display_name": 0.01,      # Minor
+        }
+        
+        # Track weighted score
+        total_weight = 0.0
+        achieved_weight = 0.0
+        field_matches = {}  # Track individual field matches
         
         for field, expected_value in expected.items():
             if expected_value is None:
                 continue
             
             actual_value = actual_parsed.get(field)
-            is_critical = field in CRITICAL_FIELDS
-            is_flexible = field in FLEXIBLE_FIELDS
+            field_weight = FIELD_WEIGHTS.get(field, 0.0)
             
-            # Skip fields that are not in our categories (like "types" array)
-            if not is_critical and not is_flexible:
-                # Handle special case: "types" array for multi-transaction
+            # Skip fields with no weight or special arrays
+            if field_weight == 0:
                 if field == "types" and isinstance(expected_value, list):
-                    # Just check transactions_count matches
                     continue
-                continue
+                if field not in CRITICAL_FIELDS and field not in IMPORTANT_FIELDS and field not in MINOR_FIELDS:
+                    continue
+            
+            total_weight += field_weight
             
             field_matched = False
+            match_score = 0.0  # Partial match score (0.0 to 1.0)
             
+            # Match logic by field type
             if field == "amount":
-                # Numeric comparison with tolerance
+                # Numeric comparison with tolerance (±1 VND)
                 if actual_value is not None:
                     try:
-                        if abs(float(actual_value) - float(expected_value)) < 1:
+                        diff = abs(float(actual_value) - float(expected_value))
+                        if diff < 1:
                             field_matched = True
+                            match_score = 1.0
+                        elif diff < float(expected_value) * 0.05:  # Within 5%
+                            match_score = 0.8  # Partial credit for close match
                     except (ValueError, TypeError):
                         pass
             
-            elif field == "transaction_date":
-                # Date comparison (handle relative dates)
-                if expected_value in ["today", "yesterday", "relative:-1day"]:
-                    if actual_value:  # Just check it exists
-                        field_matched = True
-                elif actual_value == expected_value:
+            elif field == "transaction_type":
+                # Case-insensitive exact match
+                if actual_value and str(actual_value).lower() == str(expected_value).lower():
                     field_matched = True
+                    match_score = 1.0
+            
+            elif field == "currency":
+                # Case-insensitive comparison
+                if actual_value and str(actual_value).upper() == str(expected_value).upper():
+                    field_matched = True
+                    match_score = 1.0
             
             elif field == "transactions_count":
                 if actual_value is not None:
                     try:
                         if int(actual_value) == int(expected_value):
                             field_matched = True
+                            match_score = 1.0
                     except (ValueError, TypeError):
                         pass
             
-            elif field == "transaction_type":
-                # Case-insensitive comparison
-                if actual_value and str(actual_value).lower() == str(expected_value).lower():
-                    field_matched = True
-            
-            elif field == "currency":
-                # Case-insensitive comparison
-                if actual_value and str(actual_value).upper() == str(expected_value).upper():
-                    field_matched = True
-            
-            elif field in FLEXIBLE_FIELDS:
-                # Flexible fields: just check if value exists and is reasonable
+            elif field == "category_name":
+                # Category matching: check for exact or similar match
                 if actual_value:
-                    # For category_name: bot may choose different valid category
-                    # Just check that SOME category was assigned
-                    if field == "category_name":
-                        # If bot assigned any category, consider it correct
-                        # (bot's AI may categorize differently but still valid)
+                    expected_lower = str(expected_value).lower().strip()
+                    actual_lower = str(actual_value).lower().strip()
+                    
+                    # Exact match
+                    if expected_lower == actual_lower:
                         field_matched = True
-                    elif field == "category_id":
-                        # category_id is dynamic per user, just check it exists
+                        match_score = 1.0
+                    # Similar match (contains or partial)
+                    elif expected_lower in actual_lower or actual_lower in expected_lower:
                         field_matched = True
-                    elif field == "description":
-                        # Description may vary, check if it contains key words
-                        expected_lower = str(expected_value).lower()
-                        actual_lower = str(actual_value).lower()
-                        # Check if any significant word matches
+                        match_score = 0.8
+                    # Check for keyword overlap
+                    else:
                         expected_words = set(expected_lower.split())
                         actual_words = set(actual_lower.split())
-                        if expected_words & actual_words or actual_value:
-                            field_matched = True
-                    elif field in ("member_id", "display_name"):
-                        # Just check if value exists when expected
-                        if actual_value:
-                            field_matched = True
+                        overlap = expected_words & actual_words
+                        if overlap:
+                            match_score = min(1.0, len(overlap) / max(len(expected_words), 1) * 0.7)
+                            if match_score >= 0.5:
+                                field_matched = True
+            
+            elif field == "description":
+                # Description: flexible matching (key words)
+                if actual_value:
+                    expected_lower = str(expected_value).lower()
+                    actual_lower = str(actual_value).lower()
+                    
+                    # Exact match
+                    if expected_lower == actual_lower:
+                        field_matched = True
+                        match_score = 1.0
                     else:
-                        # Default string comparison
-                        if str(actual_value).lower() == str(expected_value).lower():
+                        # Partial match on words
+                        expected_words = set(expected_lower.split())
+                        actual_words = set(actual_lower.split())
+                        overlap = expected_words & actual_words
+                        if overlap:
+                            match_score = len(overlap) / max(len(expected_words), 1)
+                            if match_score >= 0.5:
+                                field_matched = True
+            
+            elif field == "transaction_date":
+                # Date comparison (handle relative dates)
+                if expected_value in ["today", "yesterday", "tomorrow", "relative:-1day"]:
+                    if actual_value:  # Just check it exists
+                        field_matched = True
+                        match_score = 1.0
+                elif actual_value == expected_value:
+                    field_matched = True
+                    match_score = 1.0
+            
+            elif field in ("member_id", "display_name", "category_id"):
+                # Just check if value exists when expected
+                if actual_value:
+                    # For display_name, check if it matches
+                    if field == "display_name":
+                        expected_lower = str(expected_value).lower() if expected_value else ""
+                        actual_lower = str(actual_value).lower() if actual_value else ""
+                        if expected_lower == actual_lower:
                             field_matched = True
+                            match_score = 1.0
+                        elif expected_lower in actual_lower or actual_lower in expected_lower:
+                            field_matched = True
+                            match_score = 0.8
+                    else:
+                        field_matched = True
+                        match_score = 1.0
             
-            # Count results
-            if is_critical:
-                critical_total += 1
-                if field_matched:
-                    critical_correct += 1
-            elif is_flexible:
-                flexible_total += 1
-                if field_matched:
-                    flexible_correct += 1
+            # Track match result
+            field_matches[field] = {
+                "expected": expected_value,
+                "actual": actual_value,
+                "matched": field_matched,
+                "score": match_score
+            }
+            
+            # Add to weighted score
+            achieved_weight += field_weight * match_score
         
-        # Calculate accuracy score (weighted: critical=70%, flexible=30%)
-        if critical_total > 0 or flexible_total > 0:
-            critical_score = (critical_correct / critical_total * 100) if critical_total > 0 else 100
-            flexible_score = (flexible_correct / flexible_total * 100) if flexible_total > 0 else 100
-            
-            # Weighted average
-            if critical_total > 0 and flexible_total > 0:
-                result.accuracy_score_percent = (critical_score * 0.7) + (flexible_score * 0.3)
-            elif critical_total > 0:
-                result.accuracy_score_percent = critical_score
-            else:
-                result.accuracy_score_percent = flexible_score
+        # Calculate accuracy score from weighted matches
+        if total_weight > 0:
+            result.accuracy_score_percent = (achieved_weight / total_weight) * 100
         else:
+            # No fields to check, consider as pass
             result.accuracy_score_percent = 100.0
         
-        # Determine pass/fail based on CRITICAL fields only
-        # If all critical fields match → PASS
-        # If some critical fields match → PARTIAL
-        # If no critical fields or major mismatch → FAIL
-        if critical_total == 0:
-            # No critical fields to check, pass if we got any parsed data
-            if actual_parsed.get("transactions_count", 0) > 0 or actual_parsed.get("transaction_type"):
-                result.pass_fail = PassFailStatus.PASS
-            else:
-                result.pass_fail = PassFailStatus.PASS  # No expectations, no failure
-        elif critical_correct == critical_total:
-            # All critical fields match → PASS
+        # Categorize matched/unmatched fields
+        critical_matches = []
+        critical_mismatches = []
+        important_matches = []
+        important_mismatches = []
+        minor_matches = []
+        minor_mismatches = []
+        
+        for field, match_info in field_matches.items():
+            field_type = ""
+            if field in CRITICAL_FIELDS:
+                field_type = "critical"
+                if match_info["matched"]:
+                    critical_matches.append(field)
+                else:
+                    critical_mismatches.append(f"{field}: exp={match_info['expected']}, act={match_info['actual']}")
+            elif field in IMPORTANT_FIELDS:
+                field_type = "important"
+                if match_info["matched"]:
+                    important_matches.append(field)
+                else:
+                    important_mismatches.append(f"{field}: exp={match_info['expected']}, act={match_info['actual']}")
+            elif field in MINOR_FIELDS:
+                field_type = "minor"
+                if match_info["matched"]:
+                    minor_matches.append(field)
+                else:
+                    minor_mismatches.append(f"{field}: exp={match_info['expected']}, act={match_info['actual']}")
+        
+        # Determine pass/fail based on critical fields
+        if len(critical_mismatches) == 0 and len(CRITICAL_FIELDS & set(expected.keys())) > 0:
+            # All critical fields matched → PASS
             result.pass_fail = PassFailStatus.PASS
-        elif critical_correct > 0:
-            # Some critical fields match → PARTIAL
+        elif len(critical_matches) > 0 and len(critical_mismatches) > 0:
+            # Some critical fields matched → PARTIAL
             result.pass_fail = PassFailStatus.PARTIAL
-        else:
-            # No critical fields match → FAIL
+        elif len(critical_matches) == 0 and len(CRITICAL_FIELDS & set(expected.keys())) > 0:
+            # No critical fields matched → FAIL
             result.pass_fail = PassFailStatus.FAIL
             result.issues_found = True
+        else:
+            # No critical fields to check, check overall accuracy
+            if result.accuracy_score_percent >= self.config.accuracy_pass_threshold * 100:
+                result.pass_fail = PassFailStatus.PASS
+            elif result.accuracy_score_percent >= 50:
+                result.pass_fail = PassFailStatus.PARTIAL
+            else:
+                result.pass_fail = PassFailStatus.FAIL
         
-        # Add debug info to notes
-        if critical_total > 0:
-            result.notes += f"Critical: {critical_correct}/{critical_total}. "
-        if flexible_total > 0:
-            result.notes += f"Flexible: {flexible_correct}/{flexible_total}. "
+        # Build detailed notes
+        result.notes += f"Accuracy: {result.accuracy_score_percent:.1f}%. "
+        
+        # Critical fields summary
+        if critical_matches or critical_mismatches:
+            result.notes += f"Critical: {len(critical_matches)} matched"
+            if critical_mismatches:
+                result.notes += f", {len(critical_mismatches)} failed"
+            result.notes += ". "
+        
+        # Important fields summary
+        if important_matches or important_mismatches:
+            result.notes += f"Important: {len(important_matches)} matched"
+            if important_mismatches:
+                result.notes += f", {len(important_mismatches)} failed"
+            result.notes += ". "
+        
+        # Minor fields summary (only if there are issues)
+        if minor_mismatches:
+            result.notes += f"Minor: {len(minor_mismatches)} differ. "
+        
+        # Add detailed mismatch info
+        all_mismatches = critical_mismatches + important_mismatches
+        if all_mismatches:
+            result.notes += f"Mismatches: {', '.join(all_mismatches[:2])}. "
+            if len(all_mismatches) > 2:
+                result.notes += f"(+{len(all_mismatches) - 2} more). "
+        
+        # Overall assessment
+        if result.accuracy_score_percent >= 95:
+            result.notes += "Excellent match. "
+        elif result.accuracy_score_percent >= self.config.accuracy_pass_threshold * 100:
+            result.notes += f"Above threshold ({self.config.accuracy_pass_threshold * 100}%). "
+        else:
+            result.notes += f"Below threshold ({self.config.accuracy_pass_threshold * 100}%). "
     
     def _evaluate_class_principles(
         self,
@@ -415,12 +529,16 @@ class TestEvaluator:
             result.notes += f"CLASS principles not met: {', '.join(failed_principles)}. "
     
     def _evaluate_latency(self, latency_ms: int, result: TestRunResult):
-        """Evaluate response latency"""
+        """Evaluate response latency with detailed notes"""
         if latency_ms > self.config.latency_critical_ms:
-            result.notes += f"Critical latency: {latency_ms}ms. "
+            result.notes += f"Critical latency: {latency_ms}ms (threshold: {self.config.latency_critical_ms}ms). "
+            result.notes += f"Exceeds critical threshold by {latency_ms - self.config.latency_critical_ms}ms ({((latency_ms / self.config.latency_critical_ms) - 1) * 100:.1f}%). "
             result.stability_observation = StabilityObservation.TIMEOUT
         elif latency_ms > self.config.latency_warning_ms:
-            result.notes += f"High latency: {latency_ms}ms. "
+            result.notes += f"High latency: {latency_ms}ms (warning threshold: {self.config.latency_warning_ms}ms). "
+            result.notes += f"Exceeds warning threshold by {latency_ms - self.config.latency_warning_ms}ms ({((latency_ms / self.config.latency_warning_ms) - 1) * 100:.1f}%). "
+        else:
+            result.notes += f"Latency: {latency_ms}ms (within acceptable range). "
     
     def _evaluate_stability(
         self,
